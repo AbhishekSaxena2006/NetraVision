@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About — NetraVision | Our Mission</title>
+  <meta name="description" content="Learn about NetraVision — a college research project using AI to detect diabetic retinopathy, our mission, vision, and values." />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    .about-hero-img {
+      width: 100%;
+      max-height: 420px;
+      object-fit: cover;
+      border-radius: var(--border-radius-xl);
+      border: var(--border-glow);
+      box-shadow: var(--shadow-glow);
+    }
+    .mission-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 0;
+    }
+    .mission-card {
+      background: var(--clr-bg-card);
+      border: var(--border-card);
+      border-radius: var(--border-radius-lg);
+      padding: 32px 24px;
+      text-align: center;
+      transition: transform var(--transition-base), border-color var(--transition-base);
+      position: relative;
+      overflow: hidden;
+    }
+    .mission-card::before {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--grad-blue);
+      transform: scaleX(0);
+      transition: transform var(--transition-base);
+    }
+    .mission-card:hover { transform: translateY(-6px); border-color: rgba(14,165,233,0.35); }
+    .mission-card:hover::before { transform: scaleX(1); }
+    .mission-icon { font-size: 2.2rem; margin-bottom: 16px; }
+    .mission-card h3 { font-family: var(--font-display); font-size: 1.2rem; font-weight: 700; margin-bottom: 12px; }
+    .mission-card p { color: var(--clr-text-secondary); font-size: 0.9rem; line-height: 1.7; }
+
+    .about-intro-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+    }
+    .value-list { display: flex; flex-direction: column; gap: 16px; margin-top: 24px; }
+    .value-item {
+      display: flex; align-items: flex-start; gap: 16px;
+      padding: 16px 20px;
+      background: var(--clr-bg-card);
+      border: var(--border-card);
+      border-radius: var(--border-radius-md);
+      transition: border-color var(--transition-base);
+    }
+    .value-item:hover { border-color: rgba(14,165,233,0.35); }
+    .value-icon {
+      width: 42px; height: 42px;
+      border-radius: 10px;
+      background: rgba(14,165,233,0.1);
+      border: 1px solid rgba(14,165,233,0.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .value-item h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 4px; }
+    .value-item p  { font-size: 0.85rem; color: var(--clr-text-secondary); line-height: 1.5; }
+
+    .tech-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: var(--border-radius-full);
+      background: rgba(14,165,233,0.08);
+      border: 1px solid rgba(14,165,233,0.2);
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--clr-blue-light);
+      margin: 4px;
+    }
+    .tech-badges { display: flex; flex-wrap: wrap; margin-top: 16px; }
+
+    @media (max-width: 768px) {
+      .mission-grid, .about-intro-grid { grid-template-columns: 1fr; }
+      .about-intro-grid { gap: 40px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="navbar__inner">
+    <a href="index.html" class="navbar__logo">
+      <div class="navbar__logo-icon"><img src="assets/images/logo_bg.jpg" alt="NetraVision" /></div>
+      <div><span class="navbar__logo-text">NetraVision</span><span class="navbar__logo-sub">AI Retinal Analysis</span></div>
+    </a>
+    <nav class="navbar__nav">
+      <a href="index.html"        class="navbar__link">Home</a>
+      <a href="predict.html"      class="navbar__link">Predict</a>
+      <a href="how-it-works.html" class="navbar__link">How It Works</a>
+      <a href="features.html"     class="navbar__link">Features</a>
+      <a href="about.html"        class="navbar__link active">About</a>
+      <a href="team.html"         class="navbar__link">Team</a>
+      <a href="contact.html"      class="navbar__link">Contact</a>
+    </nav>
+    <a href="predict.html" class="btn btn--primary btn--sm navbar__cta"><i class="fas fa-eye"></i> Try Now</a>
+    <button class="navbar__hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="navbar__mobile" id="mobileNav">
+    <a href="index.html"        class="navbar__link">Home</a>
+    <a href="predict.html"      class="navbar__link">Predict</a>
+    <a href="how-it-works.html" class="navbar__link">How It Works</a>
+    <a href="features.html"     class="navbar__link">Features</a>
+    <a href="about.html"        class="navbar__link">About</a>
+    <a href="team.html"         class="navbar__link">Team</a>
+    <a href="contact.html"      class="navbar__link">Contact</a>
+  </div>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="container">
+    <nav class="breadcrumb">
+      <a href="index.html">Home</a>
+      <i class="fas fa-chevron-right" style="font-size:0.7rem"></i>
+      <span>About</span>
+    </nav>
+    <div class="section-badge" style="margin-inline:auto;display:inline-flex;">Our Story</div>
+    <h1 style="margin-top:12px;">About <span class="text-gradient">NetraVision</span></h1>
+    <p>Bridging the gap between artificial intelligence and accessible healthcare through innovative research and technology.</p>
+  </div>
+</div>
+
+<!-- INTRO SECTION -->
+<section class="section" style="background:var(--clr-bg-secondary);">
+  <div class="container">
+    <div class="about-intro-grid">
+      <div data-reveal>
+        <div class="section-badge">Who We Are</div>
+        <h2 style="font-family:var(--font-display);font-size:clamp(1.8rem,3vw,2.4rem);font-weight:700;line-height:1.2;margin:16px 0 20px;">
+          Bringing <span class="text-gradient">AI-Powered Vision</span> to Healthcare
+        </h2>
+        <p style="color:var(--clr-text-secondary);line-height:1.8;margin-bottom:16px;">
+          NetraVision is a college research project developed by a passionate team of Computer Science students. Our goal is to demonstrate how Convolutional Neural Networks can be applied to real-world medical challenges — specifically the detection and classification of diabetic retinopathy.
+        </p>
+        <p style="color:var(--clr-text-secondary);line-height:1.8;margin-bottom:24px;">
+          Diabetic retinopathy is a leading cause of preventable blindness. By training a CNN on thousands of labeled retinal fundus images, we have built a system that can classify the disease across five internationally recognized severity levels with high accuracy.
+        </p>
+
+        <div class="tech-badges">
+          <span class="tech-badge"><i class="fab fa-python"></i> Python</span>
+          <span class="tech-badge"><i class="fas fa-brain"></i> TensorFlow / Keras</span>
+          <span class="tech-badge"><i class="fas fa-flask"></i> Flask</span>
+          <span class="tech-badge"><i class="fab fa-html5"></i> HTML5 / CSS3 / JS</span>
+          <span class="tech-badge"><i class="fas fa-database"></i> APTOS 2019 Dataset</span>
+          <span class="tech-badge"><i class="fas fa-network-wired"></i> CNN Architecture</span>
+        </div>
+      </div>
+
+      <div data-reveal class="delay-2">
+        <img src="assets/images/about_bg.jpg" alt="Medical AI technology visualization" class="about-hero-img" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MISSION / VISION / VALUES -->
+<section class="section">
+  <div class="container">
+    <div class="section-header" data-reveal>
+      <div class="section-badge">Our Principles</div>
+      <h2>Mission, Vision &amp; <span class="text-gradient">Values</span></h2>
+      <div class="section-divider"></div>
+    </div>
+
+    <div class="mission-grid">
+      <div class="mission-card" data-reveal data-reveal-delay="1">
+        <div class="mission-icon">🎯</div>
+        <h3>Our Mission</h3>
+        <p>To harness the power of deep learning and make diabetic retinopathy screening more accessible, faster, and cost-effective — particularly in under-resourced healthcare settings.</p>
+      </div>
+      <div class="mission-card" data-reveal data-reveal-delay="2">
+        <div class="mission-icon">🔭</div>
+        <h3>Our Vision</h3>
+        <p>A future where early-stage eye disease is detected automatically and affordably for every diabetic patient worldwide, preventing unnecessary vision loss through timely intervention.</p>
+      </div>
+      <div class="mission-card" data-reveal data-reveal-delay="3">
+        <div class="mission-icon">💡</div>
+        <h3>Our Purpose</h3>
+        <p>To demonstrate, through rigorous academic research, how AI models trained on public medical datasets can achieve clinically meaningful performance and support — not replace — ophthalmologists.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VALUES -->
+<section class="section" style="background:var(--clr-bg-secondary);">
+  <div class="container">
+    <div class="about-intro-grid">
+      <div data-reveal>
+        <div class="section-badge">Core Values</div>
+        <h2 style="font-family:var(--font-display);font-size:clamp(1.6rem,3vw,2.2rem);font-weight:700;line-height:1.2;margin:16px 0 20px;">
+          What Drives <span class="text-gradient">Our Work</span>
+        </h2>
+        <div class="value-list">
+          <div class="value-item">
+            <div class="value-icon"><i class="fas fa-heart" style="color:#ef4444;"></i></div>
+            <div>
+              <h4>Patient-Centered</h4>
+              <p>Every decision we make is driven by the potential impact on real patients and their quality of life.</p>
+            </div>
+          </div>
+          <div class="value-item">
+            <div class="value-icon"><i class="fas fa-shield-alt" style="color:var(--clr-cyan);"></i></div>
+            <div>
+              <h4>Responsible AI</h4>
+              <p>We acknowledge limitations and clearly label all results as educational. We do not make clinical claims.</p>
+            </div>
+          </div>
+          <div class="value-item">
+            <div class="value-icon"><i class="fas fa-lock" style="color:var(--clr-blue-light);"></i></div>
+            <div>
+              <h4>Privacy &amp; Ethics</h4>
+              <p>User images are never stored or shared. We respect patient data and follow ethical AI principles.</p>
+            </div>
+          </div>
+          <div class="value-item">
+            <div class="value-icon"><i class="fas fa-graduation-cap" style="color:#a855f7;"></i></div>
+            <div>
+              <h4>Academic Rigor</h4>
+              <p>Our model is trained using established datasets and validated through standard machine learning metrics.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div data-reveal class="delay-2">
+        <div class="section-badge">Project Context</div>
+        <h2 style="font-family:var(--font-display);font-size:clamp(1.6rem,3vw,2.2rem);font-weight:700;line-height:1.2;margin:16px 0 20px;">
+          A College <span class="text-gradient">Research Project</span>
+        </h2>
+        <p style="color:var(--clr-text-secondary);line-height:1.8;margin-bottom:16px;">
+          NetraVision was built as part of our Computer Science final-year project. Each team member was responsible for a specific module: dataset preparation, model training, backend API, and frontend development.
+        </p>
+        <p style="color:var(--clr-text-secondary);line-height:1.8;margin-bottom:16px;">
+          We used the <strong style="color:var(--clr-text-primary);">APTOS 2019 Blindness Detection</strong> dataset from Kaggle, which contains thousands of retinal fundus images labeled by trained clinicians.
+        </p>
+        <p style="color:var(--clr-text-secondary);line-height:1.8;margin-bottom:24px;">
+          Our CNN model was built using TensorFlow and Keras, with a custom architecture fine-tuned from established pre-trained models. The web interface you're using is the frontend — built with vanilla HTML, CSS, and JavaScript.
+        </p>
+        <div class="alert alert--info">
+          <i class="fas fa-info-circle" style="flex-shrink:0;"></i>
+          <div>
+            <strong>Disclaimer:</strong> NetraVision is not a certified medical device and is intended for educational and research purposes only. Always consult a qualified healthcare professional.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section" style="text-align:center;background:linear-gradient(135deg,#0c1e3d,#020b18);position:relative;overflow:hidden;">
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,rgba(14,165,233,0.12) 0%,transparent 65%);pointer-events:none;"></div>
+  <div class="container" style="position:relative;">
+    <div data-reveal>
+      <div class="section-badge" style="display:inline-flex;">Ready to Try?</div>
+      <h2 style="font-family:var(--font-display);font-size:clamp(1.8rem,3.5vw,2.8rem);font-weight:700;margin:16px 0 12px;">
+        Experience <span class="text-gradient">NetraVision</span> Live
+      </h2>
+      <p style="color:var(--clr-text-secondary);max-width:560px;margin-inline:auto;margin-bottom:36px;">
+        Upload a retinal image and see our AI model classify diabetic retinopathy in real time.
+      </p>
+      <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+        <a href="predict.html" class="btn btn--primary btn--lg"><i class="fas fa-eye"></i> Try the Predictor</a>
+        <a href="team.html"    class="btn btn--outline btn--lg"><i class="fas fa-users"></i> Meet the Team</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div class="footer__brand">
+        <a href="index.html" class="navbar__logo" style="display:inline-flex;margin-bottom:8px;">
+          <div class="navbar__logo-icon"><img src="assets/images/logo_bg.jpg" alt="NetraVision" /></div>
+          <div><span class="navbar__logo-text">NetraVision</span><span class="navbar__logo-sub">AI Retinal Analysis</span></div>
+        </a>
+        <p>AI-powered diabetic retinopathy detection. Educational research project.</p>
+        <div class="footer__social" style="margin-top:20px;">
+          <a href="#" class="social-icon"><i class="fab fa-github"></i></a>
+          <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+        </div>
+      </div>
+      <div><div class="footer__heading">Navigation</div>
+        <nav class="footer__links">
+          <a href="index.html">Home</a><a href="predict.html">Predict</a>
+          <a href="how-it-works.html">How It Works</a><a href="features.html">Features</a>
+        </nav>
+      </div>
+      <div><div class="footer__heading">Information</div>
+        <nav class="footer__links"><a href="about.html">About</a><a href="team.html">Team</a><a href="contact.html">Contact</a></nav>
+      </div>
+      <div>
+        <div class="footer__heading">Disclaimer</div>
+        <p style="color:var(--clr-text-secondary);font-size:0.85rem;line-height:1.7;">Educational purposes only. Not for clinical use. Consult a qualified ophthalmologist.</p>
+      </div>
+    </div>
+    <div class="glow-line"></div>
+    <div class="footer__bottom">
+      <p>© 2026 NetraVision</p>
+      <p>Made with <span style="color:#ef4444;">❤</span> for better healthcare.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>

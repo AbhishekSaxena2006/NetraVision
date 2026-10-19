@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>How It Works — NetraVision | AI Pipeline Explained</title>
+  <meta name="description" content="Learn how NetraVision's AI pipeline processes retinal images: upload, preprocessing, CNN analysis, classification, and results." />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    /* Workflow Steps */
+    .workflow {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .workflow::before {
+      content: '';
+      position: absolute;
+      left: 52px;
+      top: 0; bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--clr-blue-primary), var(--clr-cyan), transparent);
+      z-index: 0;
+    }
+    .workflow-step {
+      display: flex;
+      gap: 32px;
+      align-items: flex-start;
+      padding: 32px 0;
+      position: relative;
+      z-index: 1;
+    }
+    .step-number {
+      width: 56px; height: 56px;
+      border-radius: 50%;
+      background: var(--grad-blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      box-shadow: 0 0 20px rgba(14,165,233,0.4);
+      position: relative;
+      z-index: 2;
+    }
+    .step-icon-ring {
+      position: absolute;
+      inset: -6px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(14,165,233,0.3);
+      animation: pulse-ring 2s ease-in-out infinite;
+    }
+    @keyframes pulse-ring {
+      0%,100% { transform: scale(1); opacity: 0.6; }
+      50%      { transform: scale(1.1); opacity: 0.2; }
+    }
+    .step-content {
+      flex: 1;
+      padding-top: 8px;
+    }
+    .step-tag {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--clr-cyan-light);
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .step-content h3 {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    .step-content p {
+      color: var(--clr-text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.75;
+      max-width: 620px;
+    }
+    .step-details {
+      margin-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .step-tag-chip {
+      padding: 5px 14px;
+      border-radius: var(--border-radius-full);
+      background: rgba(14,165,233,0.08);
+      border: 1px solid rgba(14,165,233,0.18);
+      font-size: 0.78rem;
+      color: var(--clr-blue-light);
+      font-weight: 500;
+    }
+
+    /* Tech Pipeline Visual */
+    .pipeline-visual {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      overflow-x: auto;
+      padding: 32px 0;
+    }
+    .pipeline-node {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      min-width: 130px;
+      text-align: center;
+    }
+    .pipeline-icon {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: var(--clr-bg-card);
+      border: var(--border-card);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      transition: border-color var(--transition-base), box-shadow var(--transition-base);
+    }
+    .pipeline-node:hover .pipeline-icon {
+      border-color: rgba(14,165,233,0.4);
+      box-shadow: 0 0 20px rgba(14,165,233,0.2);
+    }
+    .pipeline-label { font-size: 0.8rem; font-weight: 600; color: var(--clr-text-secondary); }
+    .pipeline-arrow {
+      flex: 1;
+      height: 2px;
+      background: linear-gradient(90deg, var(--clr-blue-primary), var(--clr-cyan));
+      min-width: 30px;
+      position: relative;
+    }
+    .pipeline-arrow::after {
+      content: '';
+      position: absolute;
+      right: -6px; top: 50%;
+      transform: translateY(-50%);
+      width: 0; height: 0;
+      border-left: 8px solid var(--clr-cyan);
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+    }
+
+    /* FAQ */
+    .faq-item {
+      background: var(--clr-bg-card);
+      border: var(--border-card);
+      border-radius: var(--border-radius-md);
+      overflow: hidden;
+      margin-bottom: 12px;
+      transition: border-color var(--transition-base);
+    }
+    .faq-item:hover { border-color: rgba(14,165,233,0.3); }
+    .faq-question {
+      padding: 20px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.95rem;
+      user-select: none;
+      gap: 16px;
+    }
+    .faq-icon {
+      width: 24px; height: 24px;
+      border-radius: 50%;
+      background: rgba(14,165,233,0.1);
+      border: 1px solid rgba(14,165,233,0.2);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: transform var(--transition-base), background var(--transition-base);
+      font-size: 0.8rem;
+      color: var(--clr-blue-light);
+    }
+    .faq-item.open .faq-icon { transform: rotate(45deg); background: rgba(14,165,233,0.2); }
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease, padding var(--transition-base);
+      padding: 0 24px;
+      color: var(--clr-text-secondary);
+      font-size: 0.9rem;
+      line-height: 1.75;
+    }
+    .faq-item.open .faq-answer { max-height: 300px; padding: 0 24px 20px; }
+
+    @media (max-width: 600px) {
+      .workflow::before { left: 28px; }
+      .step-number { width: 40px; height: 40px; font-size: 0.9rem; }
+      .workflow-step { gap: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="navbar__inner">
+    <a href="index.html" class="navbar__logo">
+      <div class="navbar__logo-icon"><img src="assets/images/logo_bg.jpg" alt="NetraVision" /></div>
+      <div><span class="navbar__logo-text">NetraVision</span><span class="navbar__logo-sub">AI Retinal Analysis</span></div>
+    </a>
+    <nav class="navbar__nav">
+      <a href="index.html"        class="navbar__link">Home</a>
+      <a href="predict.html"      class="navbar__link">Predict</a>
+      <a href="how-it-works.html" class="navbar__link active">How It Works</a>
+      <a href="features.html"     class="navbar__link">Features</a>
+      <a href="about.html"        class="navbar__link">About</a>
+      <a href="team.html"         class="navbar__link">Team</a>
+      <a href="contact.html"      class="navbar__link">Contact</a>
+    </nav>
+    <a href="predict.html" class="btn btn--primary btn--sm navbar__cta"><i class="fas fa-eye"></i> Try Now</a>
+    <button class="navbar__hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="navbar__mobile" id="mobileNav">
+    <a href="index.html"        class="navbar__link">Home</a>
+    <a href="predict.html"      class="navbar__link">Predict</a>
+    <a href="how-it-works.html" class="navbar__link">How It Works</a>
+    <a href="features.html"     class="navbar__link">Features</a>
+    <a href="about.html"        class="navbar__link">About</a>
+    <a href="team.html"         class="navbar__link">Team</a>
+    <a href="contact.html"      class="navbar__link">Contact</a>
+  </div>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="container">
+    <nav class="breadcrumb">
+      <a href="index.html">Home</a>
+      <i class="fas fa-chevron-right" style="font-size:0.7rem"></i>
+      <span>How It Works</span>
+    </nav>
+    <div class="section-badge" style="margin-inline:auto;display:inline-flex;">Technical Pipeline</div>
+    <h1 style="margin-top:12px;">How <span class="text-gradient">It Works</span></h1>
+    <p>A step-by-step look at how NetraVision processes your retinal image and produces a diabetic retinopathy classification.</p>
+  </div>
+</div>
+
+<!-- PIPELINE VISUAL -->
+<section class="section section--sm" style="background:var(--clr-bg-secondary);">
+  <div class="container">
+    <div class="section-header" data-reveal>
+      <div class="section-badge">AI Pipeline</div>
+      <h2>The <span class="text-gradient">5-Stage Process</span></h2>
+      <div class="section-divider"></div>
+      <p>From image upload to final classification — see exactly how our AI pipeline works.</p>
+    </div>
+
+    <div class="pipeline-visual" data-reveal>
+      <div class="pipeline-node">
+        <div class="pipeline-icon">📤</div>
+        <span class="pipeline-label">Image Upload</span>
+      </div>
+      <div class="pipeline-arrow"></div>
+      <div class="pipeline-node">
+        <div class="pipeline-icon">⚙️</div>
+        <span class="pipeline-label">Preprocessing</span>
+      </div>
+      <div class="pipeline-arrow"></div>
+      <div class="pipeline-node">
+        <div class="pipeline-icon">🧠</div>
+        <span class="pipeline-label">CNN Analysis</span>
+      </div>
+      <div class="pipeline-arrow"></div>
+      <div class="pipeline-node">
+        <div class="pipeline-icon">📊</div>
+        <span class="pipeline-label">Classification</span>
+      </div>
+      <div class="pipeline-arrow"></div>
+      <div class="pipeline-node">
+        <div class="pipeline-icon">📋</div>
+        <span class="pipeline-label">Result Output</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DETAILED STEPS -->
+<section class="section">
+  <div class="container">
+    <div class="workflow">
+
+      <div class="workflow-step" data-reveal>
+        <div class="step-number">
+          1
+          <div class="step-icon-ring"></div>
+        </div>
+        <div class="step-content">
+          <div class="step-tag">Step 01</div>
+          <h3>Image Upload &amp; Validation</h3>
+          <p>The user uploads a retinal fundus photograph via the drag-and-drop interface. The frontend performs immediate validation — checking the file type (JPG/PNG), file size (max 10 MB), and readability before sending it to the server.</p>
+          <div class="step-details">
+            <span class="step-tag-chip">Drag &amp; Drop</span>
+            <span class="step-tag-chip">Type Validation</span>
+            <span class="step-tag-chip">Size Check</span>
+            <span class="step-tag-chip">Image Preview</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="workflow-step" data-reveal>
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <div class="step-tag">Step 02</div>
+          <h3>Image Preprocessing</h3>
+          <p>The uploaded image is preprocessed on the backend: resized to a standardized input dimension (224×224 or 512×512 pixels), normalized pixel values to the range [0, 1], and optionally enhanced using CLAHE (Contrast Limited Adaptive Histogram Equalization) to improve visibility of retinal features.</p>
+          <div class="step-details">
+            <span class="step-tag-chip">Resize &amp; Crop</span>
+            <span class="step-tag-chip">Pixel Normalization</span>
+            <span class="step-tag-chip">CLAHE Enhancement</span>
+            <span class="step-tag-chip">Data Augmentation</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="workflow-step" data-reveal>
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <div class="step-tag">Step 03</div>
+          <h3>CNN Feature Extraction &amp; Analysis</h3>
+          <p>The preprocessed image passes through our Convolutional Neural Network. The CNN uses multiple convolutional layers to extract hierarchical features — from simple edges and textures to complex retinal structures like microaneurysms, hemorrhages, and neovascularization. A pre-trained backbone (e.g., EfficientNet or ResNet) is fine-tuned on the APTOS 2019 dataset.</p>
+          <div class="step-details">
+            <span class="step-tag-chip">Convolutional Layers</span>
+            <span class="step-tag-chip">MaxPooling</span>
+            <span class="step-tag-chip">Batch Normalization</span>
+            <span class="step-tag-chip">Transfer Learning</span>
+            <span class="step-tag-chip">Dropout Regularization</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="workflow-step" data-reveal>
+        <div class="step-number">4</div>
+        <div class="step-content">
+          <div class="step-tag">Step 04</div>
+          <h3>5-Level Classification</h3>
+          <p>The extracted feature vector passes through fully connected dense layers, followed by a Softmax output layer with 5 neurons — one for each DR severity level. The model outputs a probability distribution across all 5 classes, and the class with the highest probability is selected as the prediction.</p>
+          <div class="step-details">
+            <span class="step-tag-chip">Dense Layers</span>
+            <span class="step-tag-chip">Softmax Activation</span>
+            <span class="step-tag-chip">5-Class Output</span>
+            <span class="step-tag-chip">Confidence Scoring</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="workflow-step" data-reveal>
+        <div class="step-number">5</div>
+        <div class="step-content">
+          <div class="step-tag">Step 05</div>
+          <h3>Result Presentation</h3>
+          <p>The prediction — including the severity level, confidence score, and probability breakdown — is returned via the Flask API as JSON. The frontend renders an interactive results page with severity classification, confidence progress bars, class probability breakdown, and educational recommendations tailored to the detected DR level.</p>
+          <div class="step-details">
+            <span class="step-tag-chip">JSON API Response</span>
+            <span class="step-tag-chip">Confidence Score</span>
+            <span class="step-tag-chip">Probability Bars</span>
+            <span class="step-tag-chip">Recommendations</span>
+            <span class="step-tag-chip">Download Report</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- MODEL ARCHITECTURE -->
+<section class="section" style="background:var(--clr-bg-secondary);">
+  <div class="container">
+    <div class="section-header" data-reveal>
+      <div class="section-badge">Model Architecture</div>
+      <h2>CNN <span class="text-gradient">Architecture Details</span></h2>
+      <div class="section-divider"></div>
+    </div>
+
+    <div class="grid-3" style="gap:24px;">
+      <div class="card" data-reveal data-reveal-delay="1">
+        <div class="card__icon"><i class="fas fa-layer-group" style="color:var(--clr-blue-light)"></i></div>
+        <h3>Backbone</h3>
+        <p>Pre-trained EfficientNet or ResNet architecture, fine-tuned on medical retinal images for domain-specific feature extraction.</p>
+      </div>
+      <div class="card" data-reveal data-reveal-delay="2">
+        <div class="card__icon"><i class="fas fa-database" style="color:var(--clr-cyan-light)"></i></div>
+        <h3>Training Data</h3>
+        <p>APTOS 2019 Blindness Detection Dataset from Kaggle — thousands of labeled retinal fundus images across all 5 severity levels.</p>
+      </div>
+      <div class="card" data-reveal data-reveal-delay="3">
+        <div class="card__icon"><i class="fas fa-chart-line" style="color:var(--clr-blue-light)"></i></div>
+        <h3>Training Strategy</h3>
+        <p>Transfer learning with frozen backbone layers initially, then end-to-end fine-tuning. Data augmentation used to handle class imbalance.</p>
+      </div>
+      <div class="card" data-reveal data-reveal-delay="4">
+        <div class="card__icon"><i class="fas fa-bullseye" style="color:var(--clr-cyan-light)"></i></div>
+        <h3>Evaluation Metrics</h3>
+        <p>Accuracy, Quadratic Weighted Kappa (QWK), Precision, Recall, and F1-Score across all 5 classes on a held-out test set.</p>
+      </div>
+      <div class="card" data-reveal data-reveal-delay="5">
+        <div class="card__icon"><i class="fab fa-python" style="color:var(--clr-blue-light)"></i></div>
+        <h3>Tech Stack</h3>
+        <p>Python, TensorFlow, Keras, Flask for the API. NumPy, OpenCV for preprocessing. Frontend: HTML, CSS, Vanilla JavaScript.</p>
+      </div>
+      <div class="card" data-reveal data-reveal-delay="6">
+        <div class="card__icon"><i class="fas fa-exchange-alt" style="color:var(--clr-cyan-light)"></i></div>
+        <h3>API Format</h3>
+        <p>RESTful Flask endpoint <code>/api/predict</code> accepts multipart form data and returns JSON with level, label, confidence, and probabilities.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section">
+  <div class="container">
+    <div class="section-header" data-reveal>
+      <div class="section-badge">FAQ</div>
+      <h2>Common <span class="text-gradient">Questions</span></h2>
+      <div class="section-divider"></div>
+    </div>
+
+    <div style="max-width:800px;margin-inline:auto;">
+      <div class="faq-item" data-reveal>
+        <div class="faq-question">
+          <span>Is NetraVision a certified medical device?</span>
+          <div class="faq-icon"><i class="fas fa-plus"></i></div>
+        </div>
+        <div class="faq-answer">No. NetraVision is a college research project and is not certified by any medical regulatory authority. It is designed for educational and research purposes only. Always consult a qualified ophthalmologist for medical advice.</div>
+      </div>
+
+      <div class="faq-item" data-reveal>
+        <div class="faq-question">
+          <span>Are my uploaded images stored or shared?</span>
+          <div class="faq-icon"><i class="fas fa-plus"></i></div>
+        </div>
+        <div class="faq-answer">No. Images are only used for the duration of the analysis and are not stored on any server. Your data remains private and is never shared with third parties.</div>
+      </div>
+
+      <div class="faq-item" data-reveal>
+        <div class="faq-question">
+          <span>What type of retinal images does NetraVision accept?</span>
+          <div class="faq-icon"><i class="fas fa-plus"></i></div>
+        </div>
+        <div class="faq-answer">NetraVision accepts retinal fundus photographs in JPG or PNG format, up to 10 MB. For best results, use a clear, well-lit fundus photograph with the retina centered in the frame.</div>
+      </div>
+
+      <div class="faq-item" data-reveal>
+        <div class="faq-question">
+          <span>How accurate is the AI model?</span>
+          <div class="faq-icon"><i class="fas fa-plus"></i></div>
+        </div>
+        <div class="faq-answer">Our CNN model achieves competitive accuracy on the APTOS 2019 test set, measured using Quadratic Weighted Kappa (QWK) and overall accuracy. The exact metrics are documented in our project report. Remember: accuracy on a test dataset does not guarantee real-world clinical performance.</div>
+      </div>
+
+      <div class="faq-item" data-reveal>
+        <div class="faq-question">
+          <span>Can I use this for a real patient?</span>
+          <div class="faq-icon"><i class="fas fa-plus"></i></div>
+        </div>
+        <div class="faq-answer">Absolutely not. NetraVision is for educational use only and must never be used to make clinical decisions for real patients. It cannot replace the judgment of a trained ophthalmologist.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div class="footer__brand">
+        <a href="index.html" class="navbar__logo" style="display:inline-flex;margin-bottom:8px;">
+          <div class="navbar__logo-icon"><img src="assets/images/logo_bg.jpg" alt="NetraVision" /></div>
+          <div><span class="navbar__logo-text">NetraVision</span><span class="navbar__logo-sub">AI Retinal Analysis</span></div>
+        </a>
+        <p>AI-powered diabetic retinopathy detection. Educational research project.</p>
+        <div class="footer__social" style="margin-top:20px;">
+          <a href="#" class="social-icon"><i class="fab fa-github"></i></a>
+          <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+        </div>
+      </div>
+      <div><div class="footer__heading">Navigation</div>
+        <nav class="footer__links">
+          <a href="index.html">Home</a><a href="predict.html">Predict</a>
+          <a href="how-it-works.html">How It Works</a><a href="features.html">Features</a>
+        </nav>
+      </div>
+      <div><div class="footer__heading">Information</div>
+        <nav class="footer__links"><a href="about.html">About</a><a href="team.html">Team</a><a href="contact.html">Contact</a></nav>
+      </div>
+      <div>
+        <div class="footer__heading">Disclaimer</div>
+        <p style="color:var(--clr-text-secondary);font-size:0.85rem;line-height:1.7;">Educational purposes only. Not for clinical use.</p>
+      </div>
+    </div>
+    <div class="glow-line"></div>
+    <div class="footer__bottom">
+      <p>© 2026 NetraVision</p>
+      <p>Made with <span style="color:#ef4444;">❤</span> for better healthcare.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+// FAQ accordion
+document.querySelectorAll('.faq-question').forEach(q => {
+  q.addEventListener('click', () => {
+    const item = q.parentElement;
+    const isOpen = item.classList.contains('open');
+    // Close all
+    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+    // Open clicked (if it wasn't open)
+    if (!isOpen) item.classList.add('open');
+  });
+});
+</script>
+</body>
+</html>

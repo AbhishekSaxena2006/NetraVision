@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Predict — NetraVision | Upload Retinal Image</title>
+  <meta name="description" content="Upload a retinal fundus image to detect and classify diabetic retinopathy using NetraVision's AI model." />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    .predict-layout {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 32px;
+      align-items: start;
+    }
+    /* Drop Zone */
+    .drop-zone {
+      border: 2px dashed rgba(14,165,233,0.35);
+      border-radius: var(--border-radius-xl);
+      background: var(--clr-bg-card);
+      min-height: 360px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      cursor: pointer;
+      transition: all var(--transition-base);
+      padding: 40px;
+      text-align: center;
+      position: relative;
+    }
+    .drop-zone:hover {
+      border-color: var(--clr-blue-primary);
+      background: rgba(14,165,233,0.04);
+      box-shadow: 0 0 30px rgba(14,165,233,0.12);
+    }
+    .upload-icon {
+      font-size: 3rem;
+      color: var(--clr-blue-primary);
+      opacity: 0.8;
+      transition: transform var(--transition-base), color var(--transition-base);
+    }
+    .drop-zone:hover .upload-icon { transform: scale(1.1) translateY(-4px); }
+    .drop-zone h3 {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .drop-zone p { color: var(--clr-text-secondary); font-size: 0.9rem; }
+
+    /* Preview */
+    .preview-area {
+      border-radius: var(--border-radius-xl);
+      background: var(--clr-bg-card);
+      border: var(--border-card);
+      overflow: hidden;
+    }
+    .preview-header {
+      padding: 16px 20px;
+      border-bottom: var(--border-card);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .preview-header span { font-size: 0.85rem; font-weight: 500; color: var(--clr-text-secondary); }
+    .preview-img-wrap {
+      position: relative;
+      background: #000;
+    }
+    .preview-img-wrap img {
+      width: 100%;
+      max-height: 400px;
+      object-fit: contain;
+      display: block;
+    }
+    .preview-footer {
+      padding: 16px 20px;
+      border-top: var(--border-card);
+    }
+
+    /* Progress */
+    .progress-wrap {
+      padding: 12px 0;
+    }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: var(--clr-text-secondary);
+      margin-bottom: 8px;
+    }
+
+    /* Sidebar */
+    .sidebar-card {
+      background: var(--clr-bg-card);
+      border: var(--border-card);
+      border-radius: var(--border-radius-lg);
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .sidebar-card h4 {
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--clr-blue-light);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .guidelines-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .guidelines-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 0.85rem;
+      color: var(--clr-text-secondary);
+      line-height: 1.5;
+    }
+    .guidelines-list li i { color: var(--clr-cyan); margin-top: 2px; flex-shrink: 0; }
+
+    /* Samples */
+    .sample-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+    .sample-img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      border-radius: 10px;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: border-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+    }
+    .sample-img:hover {
+      border-color: var(--clr-blue-primary);
+      transform: scale(1.04);
+      box-shadow: 0 0 12px rgba(14,165,233,0.3);
+    }
+
+    @media (max-width: 900px) {
+      .predict-layout { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="navbar__inner">
+    <a href="index.html" class="navbar__logo">
+      <div class="navbar__logo-icon"><img src="assets/images/logo_bg.jpg" alt="NetraVision" /></div>
+      <div><span class="navbar__logo-text">NetraVision</span><span class="navbar__logo-sub">AI Retinal Analysis</span></div>
+    </a>
+    <nav class="navbar__nav">
+      <a href="index.html"        class="navbar__link">Home</a>
+      <a href="predict.html"      class="navbar__link active">Predict</a>
+      <a href="how-it-works.html" class="navbar__link">How It Works</a>
+      <a href="features.html"     class="navbar__link">Features</a>
+      <a href="about.html"        class="navbar__link">About</a>
+      <a href="team.html"         class="navbar__link">Team</a>
+      <a href="contact.html"      class="navbar__link">Contact</a>
+    </nav>
+    <a href="predict.html" class="btn btn--primary btn--sm navbar__cta"><i class="fas fa-eye"></i> Try Now</a>
+    <button class="navbar__hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="navbar__mobile" id="mobileNav">
+    <a href="index.html"        class="navbar__link">Home</a>
+    <a href="predict.html"      class="navbar__link">Predict</a>
+    <a href="how-it-works.html" class="navbar__link">How It Works</a>
+    <a href="features.html"     class="navbar__link">Features</a>
+    <a href="about.html"        class="navbar__link">About</a>
+    <a href="team.html"         class="navbar__link">Team</a>
+    <a href="contact.html"      class="navbar__link">Contact</a>
+  </div>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="container">
+    <nav class="breadcrumb" aria-label="Breadcrumb">
+      <a href="index.html">Home</a>
+      <i class="fas fa-chevron-right" style="font-size:0.7rem"></i>
+      <span>Predict</span>
+    </nav>
+    <div class="section-badge" style="margin-inline:auto;display:inline-flex;">Retinal Analysis</div>
+    <h1 style="margin-top:12px;">Upload &amp; <span class="text-gradient">Analyze</span></h1>
+    <p>Upload a clear retinal fundus image (JPG or PNG) to classify diabetic retinopathy severity using our CNN model.</p>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<section class="section section--sm">
+  <div class="container">
+    <div class="predict-layout">
+
+      <!-- LEFT: Upload / Preview -->
+      <div>
+        <!-- Error message -->
+        <div id="errorMsg" class="alert alert--error hidden" role="alert" style="margin-bottom:16px;"></div>
+
+        <!-- Drop Zone -->
+        <div class="drop-zone" id="dropZone" role="region" aria-label="Image upload area">
+          <div id="uploadSection">
+            <i class="fas fa-cloud-upload-alt upload-icon" aria-hidden="true"></i>
+            <h3>Drag &amp; Drop your retinal image here</h3>
+            <p style="margin-bottom:20px;">Supports JPG, JPEG, PNG — Maximum 10 MB</p>
+            <button class="btn btn--primary" id="chooseBtn" type="button">
+              <i class="fas fa-folder-open"></i> Choose Image
+            </button>
+            <input type="file" id="fileInput" accept=".jpg,.jpeg,.png" aria-label="Choose retinal image" style="display:none;" />
+            <p style="margin-top:16px;font-size:0.78rem;color:var(--clr-text-muted);">
+              Or click anywhere in this area to browse
+            </p>
+          </div>
+        </div>
+
+        <!-- Image Preview (hidden initially) -->
+        <div class="preview-area hidden" id="previewArea">
+          <div class="preview-header">
+            <span><i class="fas fa-image" style="color:var(--clr-blue-light);margin-right:8px;"></i>Image Preview</span>
+            <button class="btn btn--sm btn--outline" id="removeBtn" type="button">
+              <i class="fas fa-times"></i> Remove
+            </button>
+          </div>
+          <div class="preview-img-wrap">
+            <img id="previewImg" src="" alt="Uploaded retinal image preview" />
+          </div>
+          <div class="preview-footer">
+            <div id="fileInfo"></div>
+          </div>
+        </div>
+
+        <!-- Progress Bar (hidden until analysis starts) -->
+        <div id="uploadProgress" class="hidden" style="margin-top:16px;">
+          <div class="progress-label">
+            <span id="progressText" style="color:var(--clr-blue-light);font-size:0.85rem;font-weight:500;">Analyzing…</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-bar__fill" id="uploadProgressFill" style="width:0%"></div>
+          </div>
+        </div>
+
+        <!-- Analyze Button -->
+        <button class="btn btn--primary btn--lg w-full mt-sm" id="analyzeBtn" type="button" disabled style="margin-top:20px;">
+          <i class="fas fa-microscope"></i> Analyze Image
+        </button>
+
+        <p style="font-size:0.78rem;color:var(--clr-text-muted);text-align:center;margin-top:10px;">
+          ⚠ Demo mode: results are simulated until the real model backend is connected.
+        </p>
+      </div>
+
+      <!-- RIGHT: Sidebar -->
+      <div>
+        <!-- Guidelines -->
+        <div class="sidebar-card" data-reveal>
+          <h4><i class="fas fa-check-circle"></i> Image Guidelines</h4>
+          <ul class="guidelines-list">
+            <li><i class="fas fa-check"></i> Use a clear, high-resolution fundus photograph</li>
+            <li><i class="fas fa-check"></i> Ensure the retina is well-centered in the image</li>
+            <li><i class="fas fa-check"></i> Good lighting — avoid glare or dark images</li>
+            <li><i class="fas fa-check"></i> File format: JPG or PNG only</li>
+            <li><i class="fas fa-check"></i> Maximum file size: 10 MB</li>
+            <li><i class="fas fa-times" style="color:var(--clr-danger)"></i> Do not use blurry or obstructed images</li>
+            <li><i class="fas fa-times" style="color:var(--clr-danger)"></i> Avoid heavily compressed or edited photos</li>
+          </ul>
+        </div>
+
+        <!-- Sample Images -->
+        <div class="sidebar-card" data-reveal>
+          <h4><i class="fas fa-images"></i> Try Sample Images</h4>
+          <p style="color:var(--clr-text-secondary);font-size:0.83rem;margin-bottom:14px;">
+            Click a sample image below to load it for analysis demonstration.
+          </p>
+          <div class="sample-grid">
+            <img src="assets/images/hero_retina.jpg"   alt="Sample retina 1" class="sample-img" title="Click to use this sample" />
+            <img src="assets/images/about_bg.jpg"      alt="Sample retina 2" class="sample-img" title="Click to use this sample" />
+            <img src="assets/images/hero_retina.jpg"   alt="Sample retina 3" class="sample-img" title="Click to use this sample" style="filter:hue-rotate(30deg);" />
+          </div>
+          <p style="font-size:0.75rem;color:var(--clr-text-muted);margin-top:10px;text-align:center;">
+            Samples are for demonstration only.
+          </p>
+        </div>
+
+        <!-- Disclaimer -->
+        <div class="alert alert--warning" data-reveal>
+          <i class="fas fa-exclamation-triangle" style="flex-shrink:0;"></i>
+          <div>
+            <strong>Educational Use Only</strong><br/>
+            Results from this tool are not a substitute for a professional medical diagnosis. Always consult a qualified ophthalmologist.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div class="footer__brand">
+        <a href="index.html" class="navbar__logo" style="display:inline-flex;margin-bottom:8px;">
+          <div class="navbar__logo-icon"><img src="assets/images/logo_bg.jpg" alt="NetraVision" /></div>
+          <div><span class="navbar__logo-text">NetraVision</span><span class="navbar__logo-sub">AI Retinal Analysis</span></div>
+        </a>
+        <p>AI-powered diabetic retinopathy detection. Educational research project.</p>
+        <div class="footer__social" style="margin-top:20px;">
+          <a href="#" class="social-icon"><i class="fab fa-github"></i></a>
+          <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+        </div>
+      </div>
+      <div><div class="footer__heading">Navigation</div>
+        <nav class="footer__links">
+          <a href="index.html">Home</a><a href="predict.html">Predict</a>
+          <a href="how-it-works.html">How It Works</a><a href="features.html">Features</a>
+        </nav>
+      </div>
+      <div><div class="footer__heading">Information</div>
+        <nav class="footer__links">
+          <a href="about.html">About</a><a href="team.html">Team</a><a href="contact.html">Contact</a>
+        </nav>
+      </div>
+      <div>
+        <div class="footer__heading">Legal</div>
+        <p style="color:var(--clr-text-secondary);font-size:0.85rem;line-height:1.7;">Educational purposes only. Not for clinical use.</p>
+      </div>
+    </div>
+    <div class="glow-line"></div>
+    <div class="footer__bottom">
+      <p>© 2026 NetraVision</p>
+      <p>Made with <span style="color:#ef4444;">❤</span> for better healthcare.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script src="js/predict.js"></script>
+</body>
+</html>

@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NetraVision — AI-Powered Diabetic Retinopathy Detection</title>
+  <meta name="description" content="NetraVision uses a Convolutional Neural Network (CNN) to detect and classify diabetic retinopathy across five severity levels from retinal fundus images." />
+  <meta name="keywords" content="diabetic retinopathy, AI detection, CNN, retinal scan, medical AI, eye disease" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    /* ---- Home-page specific styles ---- */
+    .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+    .dr-section { background: linear-gradient(135deg, #030d1c, #071428); }
+    .dr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+    .dr-levels { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
+    .level-item {
+      display: flex; align-items: center; gap: 14px;
+      padding: 14px 18px;
+      background: var(--clr-bg-card);
+      border: var(--border-card);
+      border-radius: var(--border-radius-md);
+      font-size: 0.9rem;
+      transition: border-color var(--transition-base), transform var(--transition-base);
+    }
+    .level-item:hover { border-color: rgba(14,165,233,0.35); transform: translateX(4px); }
+    .level-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .level-item:nth-child(1) .level-dot { background: #10b981; }
+    .level-item:nth-child(2) .level-dot { background: #f59e0b; }
+    .level-item:nth-child(3) .level-dot { background: #f97316; }
+    .level-item:nth-child(4) .level-dot { background: #ef4444; }
+    .level-item:nth-child(5) .level-dot { background: #a855f7; }
+    .level-name { font-weight: 600; color: var(--clr-text-primary); min-width: 180px; }
+    .level-desc { color: var(--clr-text-secondary); font-size: 0.85rem; }
+    .dr-image-wrap {
+      position: relative;
+      border-radius: var(--border-radius-xl);
+      overflow: hidden;
+      border: var(--border-glow);
+      box-shadow: var(--shadow-glow);
+    }
+    .dr-image-wrap img { width: 100%; object-fit: cover; display: block; }
+    .dr-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(7,20,40,0.7), transparent);
+    }
+    .cta-section {
+      text-align: center;
+      background: linear-gradient(135deg, #0c1e3d, #020b18);
+      position: relative;
+      overflow: hidden;
+    }
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 50%, rgba(14,165,233,0.12) 0%, transparent 65%);
+    }
+    .cta-section .container { position: relative; z-index: 1; }
+    .cta-section h2 { font-family: var(--font-display); font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 700; margin-bottom: 16px; }
+    .cta-section p  { color: var(--clr-text-secondary); font-size: 1.05rem; max-width: 560px; margin-inline: auto; margin-bottom: 36px; }
+    .disclaimer-banner {
+      background: rgba(245,158,11,0.07);
+      border: 1px solid rgba(245,158,11,0.2);
+      border-radius: var(--border-radius-md);
+      padding: 14px 20px;
+      display: flex; align-items: center; gap: 12px;
+      font-size: 0.85rem; color: #fbbf24;
+      margin-top: 32px;
+    }
+    @media (max-width: 768px) {
+      .features-grid { grid-template-columns: 1fr; }
+      .dr-grid { grid-template-columns: 1fr; gap: 40px; }
+    }
+    @media (max-width: 1024px) {
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     NAVBAR
+     ============================================================ -->
+<nav class="navbar" id="navbar">
+  <div class="navbar__inner">
+    <a href="index.html" class="navbar__logo" aria-label="NetraVision Home">
+      <div class="navbar__logo-icon">
+        <img src="assets/images/logo_bg.jpg" alt="NetraVision Logo" />
+      </div>
+      <div>
+        <span class="navbar__logo-text">NetraVision</span>
+        <span class="navbar__logo-sub">AI Retinal Analysis</span>
+      </div>
+    </a>
+
+    <nav class="navbar__nav" aria-label="Main Navigation">
+      <a href="index.html"       class="navbar__link" id="nav-home">Home</a>
+      <a href="predict.html"     class="navbar__link" id="nav-predict">Predict</a>
+      <a href="how-it-works.html"class="navbar__link" id="nav-hiw">How It Works</a>
+      <a href="features.html"    class="navbar__link" id="nav-features">Features</a>
+      <a href="about.html"       class="navbar__link" id="nav-about">About</a>
+      <a href="team.html"        class="navbar__link" id="nav-team">Team</a>
+      <a href="contact.html"     class="navbar__link" id="nav-contact">Contact</a>
+    </nav>
+
+    <a href="predict.html" class="btn btn--primary btn--sm navbar__cta" id="nav-cta-btn">
+      <i class="fas fa-eye"></i> Try Now
+    </a>
+
+    <button class="navbar__hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+
+  <!-- Mobile Drawer -->
+  <div class="navbar__mobile" id="mobileNav">
+    <a href="index.html"        class="navbar__link">Home</a>
+    <a href="predict.html"      class="navbar__link">Predict</a>
+    <a href="how-it-works.html" class="navbar__link">How It Works</a>
+    <a href="features.html"     class="navbar__link">Features</a>
+    <a href="about.html"        class="navbar__link">About</a>
+    <a href="team.html"         class="navbar__link">Team</a>
+    <a href="contact.html"      class="navbar__link">Contact</a>
+    <a href="predict.html" class="btn btn--primary mt-sm" style="text-align:center;">
+      <i class="fas fa-eye"></i> Try Now
+    </a>
+  </div>
+</nav>
+
+<!-- ============================================================
+     HERO SECTION
+     ============================================================ -->
+<section class="hero" id="home">
+  <div class="hero__bg">
+    <div class="hero__bg-grid"></div>
+    <div class="hero__bg-glow"></div>
+  </div>
+  <div class="hero__particles" aria-hidden="true"></div>
+
+  <div class="container hero__container">
+    <div class="hero__layout">
+      <!-- Left: Hero Text & Actions -->
+      <div class="hero__content">
+        <div class="hero__badge" data-reveal>
+          <span class="hero__badge-dot"></span>
+          AI-Powered Medical Analysis
+        </div>
+
+        <h1 class="hero__title" data-reveal data-reveal-delay="1">
+          See Better.<br />
+          <span class="text-gradient">Detect Earlier.</span>
+        </h1>
+
+        <p class="hero__subtitle" data-reveal data-reveal-delay="2">
+          NetraVision uses a deep Convolutional Neural Network to analyze retinal fundus images and classify diabetic retinopathy across five severity levels — empowering early detection and better outcomes.
+        </p>
+
+        <div class="hero__cta" data-reveal data-reveal-delay="3">
+          <a href="predict.html" class="btn btn--primary btn--lg" id="hero-predict-btn">
+            <i class="fas fa-search"></i> Predict Now
+          </a>
+          <a href="#learn-more" class="btn btn--outline btn--lg" id="hero-learn-btn">
+            <i class="fas fa-book-open"></i> Learn More
+          </a>
+        </div>
+
+        <div class="hero__stats" data-reveal data-reveal-delay="4">
+          <div class="stat">
+            <span class="stat__value" data-counter="5" data-suffix="">5</span>
+            <span class="stat__label">Severity Levels</span>
+          </div>
+          <div class="stat">
+            <span class="stat__value" data-counter="95" data-suffix="%">95%</span>
+            <span class="stat__label">Model Accuracy*</span>
+          </div>
+          <div class="stat">
+            <span class="stat__value" data-counter="3" data-suffix="s">&lt;3s</span>
+            <span class="stat__label">Analysis Time</span>
+          </div>
+          <div class="stat">
+            <span class="stat__value" data-counter="100" data-suffix="%">100%</span>
+            <span class="stat__label">Free to Use</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Scanning Eye Visual HUD -->
+      <div class="hero__visual-col" data-reveal data-reveal-delay="2">
+        <div class="hero__visual" aria-hidden="true">
+          <div class="scan-ring"></div>
+          <div class="scan-ring"></div>
+          <div class="scan-ring"></div>
+          <div class="scan-ring"></div>
+          <div class="scan-center">
+            <img src="assets/images/hero_retina.jpg" alt="Retinal Fundus Scan" />
+            <div class="scan-line"></div>
+          </div>
+          <!-- Clean floating HUD badges that don't collide -->
+          <div class="scan-badge scan-badge--top">
+            <span class="hero__badge-dot" style="margin:0;"></span>
+            <span>AI SCANNER ACTIVE</span>
+          </div>
+          <div class="scan-badge scan-badge--bottom">
+            <span>CNN MODEL v2.4</span>
+            <span style="opacity:0.4;">|</span>
+            <span style="color:var(--clr-cyan);">95%+ ACCURACY</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     LEARN MORE ANCHOR / FEATURES
+     ============================================================ -->
+<section class="section" id="learn-more" style="background: var(--clr-bg-secondary);">
+  <div class="container">
+    <div class="section-header" data-reveal>
+      <div class="section-badge">Core Features</div>
+      <h2>Why Choose <span class="text-gradient">NetraVision?</span></h2>
+      <div class="section-divider"></div>
+      <p>Combining the power of deep learning with an intuitive interface to make diabetic retinopathy screening accessible to everyone.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="card" data-reveal data-reveal-delay="1">
+        <div class="card__icon"><i class="fas fa-brain" style="color:var(--clr-blue-light)"></i></div>
+        <h3>Deep CNN Analysis</h3>
+        <p>Our Convolutional Neural Network is trained on thousands of labeled retinal images to achieve high classification accuracy across all five DR severity levels.</p>
+      </div>
+      <div class="card" data-reveal data-reveal-delay="2">
+        <div class="card__icon"><i class="fas fa-layer-group" style="color:var(--clr-cyan-light)"></i></div>
+        <h3>5-Level Classification</h3>
+        <p>Classifies retinopathy as Normal, Mild, Moderate, Severe, or Proliferative DR — giving clinicians and patients precise, actionable information.</p>
+      </div>
+      <div class="card" data-reveal data-reveal-delay="3">
+        <div class="card__icon"><i class="fas fa-bolt" style="color:var(--clr-blue-light)"></i></div>
+        <h3>Instant Results</h3>
+        <p>Upload a retinal fundus image and receive a detailed prediction with confidence scores in under 3 seconds, completely in the browser.</p>
+      </div>
+      <div class="card" data-reveal data-reveal-delay="4">
+        <div class="card__icon"><i class="fas fa-shield-alt" style="color:var(--clr-cyan-light)"></i></div>
+        <h3>Privacy First</h3>
+        <p>Images are processed for analysis only and are never stored or shared. Your medical data stays private and secure at all times.</p>
+      </div>
+      <div class="card" data-reveal data-reveal-delay="5">
+        <div class="card__icon"><i class="fas fa-mobile-alt" style="color:var(--clr-blue-light)"></i></div>
+        <h3>Fully Responsive</h3>
+        <p>Works beautifully on desktop, tablet, and mobile devices. Access the tool from any modern browser, anywhere, anytime.</p>
+      </div>
+      <div class="card" data-reveal data-reveal-delay="6">
+        <div class="card__icon"><i class="fas fa-graduation-cap" style="color:var(--clr-cyan-light)"></i></div>
+        <h3>Educational Purpose</h3>
+        <p>Built as a college research project to demonstrate real-world AI applications in healthcare — not intended as a medical diagnosis tool.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     DR EXPLAINER
+     ============================================================ -->
+<section class="section dr-section" id="about-dr">
+  <div class="container">
+    <div class="dr-grid">
+      <div data-reveal>
+        <div class="section-badge">Understanding the Disease</div>
+        <h2 style="font-family:var(--font-display);font-size:clamp(1.8rem,3.5vw,2.5rem);font-weight:700;line-height:1.2;margin-bottom:20px;">
+          What is <span class="text-gradient">Diabetic Retinopathy?</span>
+        </h2>
+        <p style="color:var(--clr-text-secondary);line-height:1.8;margin-bottom:24px;">
+          Diabetic retinopathy (DR) is a diabetes complication that affects the eyes by damaging the blood vessels in the retina. It is a leading cause of blindness worldwide, yet it is largely preventable through early detection and timely treatment.
+        </p>
+        <p style="color:var(--clr-text-secondary);line-height:1.8;margin-bottom:32px;">
+          NetraVision classifies retinopathy into five internationally recognized severity levels, giving you a precise understanding of the condition's progression.
+        </p>
+
+        <div class="dr-levels">
+          <div class="level-item">
+            <span class="level-dot"></span>
+            <span class="level-name">Level 0 — No DR</span>
+            <span class="level-desc">Normal retina, no signs of damage</span>
+          </div>
+          <div class="level-item">
+            <span class="level-dot"></span>
+            <span class="level-name">Level 1 — Mild DR</span>
+            <span class="level-desc">Minor microaneurysms present</span>
+          </div>
+          <div class="level-item">
+            <span class="level-dot"></span>
+            <span class="level-name">Level 2 — Moderate DR</span>
+            <span class="level-desc">More extensive vascular damage</span>
+          </div>
+          <div class="level-item">
+            <span class="level-dot"></span>
+            <span class="level-name">Level 3 — Severe DR</span>
+            <span class="level-desc">Significant retinal ischemia</span>
+          </div>
+          <div class="level-item">
+            <span class="level-dot"></span>
+            <span class="level-name">Level 4 — Proliferative DR</span>
+            <span class="level-desc">New vessel growth, high risk of blindness</span>
+          </div>
+        </div>
+      </div>
+
+      <div data-reveal class="delay-2">
+        <div class="dr-image-wrap">
+          <img src="assets/images/hero_retina.jpg" alt="Retinal fundus image showing diabetic retinopathy features" />
+          <div class="dr-overlay"></div>
+        </div>
+        <div class="disclaimer-banner">
+          <i class="fas fa-exclamation-triangle"></i>
+          <p><strong>Educational Use Only.</strong> NetraVision is a college research project. Results are not a substitute for a professional medical diagnosis. Always consult a qualified ophthalmologist.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     CALL TO ACTION
+     ============================================================ -->
+<section class="section cta-section">
+  <div class="container">
+    <div data-reveal>
+      <div class="section-badge" style="margin-inline:auto;display:inline-flex;">Ready to Begin?</div>
+      <h2 style="margin-top:16px;">Start Your <span class="text-gradient">Retinal Analysis</span></h2>
+      <p>Upload a retinal fundus image and let our AI model classify the severity of diabetic retinopathy in seconds.</p>
+      <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+        <a href="predict.html" class="btn btn--primary btn--lg" id="cta-predict-btn">
+          <i class="fas fa-eye"></i> Analyze Now — It's Free
+        </a>
+        <a href="how-it-works.html" class="btn btn--outline btn--lg" id="cta-hiw-btn">
+          <i class="fas fa-info-circle"></i> How It Works
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div class="footer__brand">
+        <a href="index.html" class="navbar__logo" style="display:inline-flex;margin-bottom:8px;">
+          <div class="navbar__logo-icon">
+            <img src="assets/images/logo_bg.jpg" alt="NetraVision" />
+          </div>
+          <div>
+            <span class="navbar__logo-text">NetraVision</span>
+            <span class="navbar__logo-sub">AI Retinal Analysis</span>
+          </div>
+        </a>
+        <p>An AI-powered diabetic retinopathy detection system built as a college project using deep Convolutional Neural Networks.</p>
+        <div class="footer__social" style="margin-top:20px;">
+          <a href="#" class="social-icon" aria-label="GitHub"><i class="fab fa-github"></i></a>
+          <a href="#" class="social-icon" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+          <a href="#" class="social-icon" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+        </div>
+      </div>
+
+      <div>
+        <div class="footer__heading">Navigation</div>
+        <nav class="footer__links">
+          <a href="index.html">Home</a>
+          <a href="predict.html">Predict</a>
+          <a href="results.html">Results</a>
+          <a href="how-it-works.html">How It Works</a>
+        </nav>
+      </div>
+
+      <div>
+        <div class="footer__heading">Information</div>
+        <nav class="footer__links">
+          <a href="features.html">Features</a>
+          <a href="about.html">About</a>
+          <a href="team.html">Our Team</a>
+          <a href="contact.html">Contact</a>
+        </nav>
+      </div>
+
+      <div>
+        <div class="footer__heading">Disclaimer</div>
+        <p style="color:var(--clr-text-secondary);font-size:0.85rem;line-height:1.7;">
+          NetraVision is designed for <strong style="color:var(--clr-text-primary);">educational purposes only</strong>. Results are not a substitute for professional medical diagnosis.
+        </p>
+        <p style="color:var(--clr-text-secondary);font-size:0.85rem;line-height:1.7;margin-top:12px;">
+          Always consult a qualified ophthalmologist for medical advice.
+        </p>
+      </div>
+    </div>
+
+    <div class="glow-line"></div>
+
+    <div class="footer__bottom">
+      <p>© 2026 NetraVision</p>
+      <p>Made with <span style="color:#ef4444;">❤</span> for better healthcare outcomes.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+</body>
+</html>

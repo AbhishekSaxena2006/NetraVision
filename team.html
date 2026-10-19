@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Our Team — NetraVision | Meet the Developers</title>
+  <meta name="description"
+    content="Meet the passionate college students behind NetraVision — an AI-powered diabetic retinopathy detection system." />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    /* Team Cards */
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 28px;
+    }
+
+    .team-card {
+      background: var(--clr-bg-card);
+      border: var(--border-card);
+      border-radius: var(--border-radius-xl);
+      overflow: hidden;
+      transition: transform var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base);
+      position: relative;
+    }
+
+    .team-card:hover {
+      transform: translateY(-8px);
+      border-color: rgba(14, 165, 233, 0.4);
+      box-shadow: 0 20px 60px rgba(14, 165, 233, 0.1), 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .team-card__image-wrap {
+      position: relative;
+      height: 240px;
+      overflow: hidden;
+      background: linear-gradient(135deg, #0c1e3d, #030d1c);
+    }
+
+    .team-card__image-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform var(--transition-slow);
+    }
+
+    .team-card:hover .team-card__image-wrap img {
+      transform: scale(1.05);
+    }
+
+    .team-card__image-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 40%, rgba(7, 20, 40, 0.85) 100%);
+    }
+
+    .team-card__role-badge {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      padding: 5px 12px;
+      border-radius: var(--border-radius-full);
+      background: rgba(14, 165, 233, 0.15);
+      border: 1px solid rgba(14, 165, 233, 0.3);
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--clr-cyan-light);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      backdrop-filter: blur(8px);
+    }
+
+    .team-card__body {
+      padding: 24px 24px 20px;
+    }
+
+    .team-card__name {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .team-card__role {
+      font-size: 0.85rem;
+      color: var(--clr-blue-light);
+      font-weight: 500;
+      margin-bottom: 14px;
+    }
+
+    .team-card__bio {
+      font-size: 0.85rem;
+      color: var(--clr-text-secondary);
+      line-height: 1.65;
+      margin-bottom: 20px;
+    }
+
+    .team-card__skills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+
+    .skill-tag {
+      padding: 3px 10px;
+      border-radius: var(--border-radius-full);
+      background: rgba(14, 165, 233, 0.07);
+      border: 1px solid rgba(14, 165, 233, 0.15);
+      font-size: 0.72rem;
+      color: var(--clr-text-secondary);
+    }
+
+    .team-card__social {
+      display: flex;
+      gap: 10px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(14, 165, 233, 0.08);
+    }
+
+    .team-social-link {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: rgba(14, 165, 233, 0.07);
+      border: 1px solid rgba(14, 165, 233, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--clr-text-secondary);
+      font-size: 0.88rem;
+      transition: all var(--transition-fast);
+      text-decoration: none;
+    }
+
+    .team-social-link:hover {
+      background: rgba(14, 165, 233, 0.18);
+      color: var(--clr-blue-light);
+      border-color: rgba(14, 165, 233, 0.4);
+      transform: translateY(-2px);
+    }
+
+    /* Lead Card (Member 1 featured) */
+    .team-card--featured {
+      border-color: rgba(14, 165, 233, 0.3);
+      box-shadow: 0 0 30px rgba(14, 165, 233, 0.08);
+    }
+
+    .team-card--featured::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--grad-blue);
+    }
+
+    /* Roles info grid */
+    .roles-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-top: 0;
+    }
+
+    .role-card {
+      background: var(--clr-bg-card);
+      border: var(--border-card);
+      border-radius: var(--border-radius-lg);
+      padding: 24px 20px;
+      text-align: center;
+      transition: transform var(--transition-base), border-color var(--transition-base);
+    }
+
+    .role-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(14, 165, 233, 0.3);
+    }
+
+    .role-num {
+      font-family: var(--font-display);
+      font-size: 2.5rem;
+      font-weight: 900;
+      background: var(--grad-blue);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .role-title {
+      font-weight: 700;
+      font-size: 0.9rem;
+      margin-bottom: 6px;
+    }
+
+    .role-desc {
+      font-size: 0.8rem;
+      color: var(--clr-text-secondary);
+    }
+
+    @media (max-width: 900px) {
+      .team-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .roles-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 560px) {
+      .team-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .roles-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar" id="navbar">
+    <div class="navbar__inner">
+      <a href="index.html" class="navbar__logo">
+        <div class="navbar__logo-icon"><img src="assets/images/logo_bg.jpg" alt="NetraVision" /></div>
+        <div><span class="navbar__logo-text">NetraVision</span><span class="navbar__logo-sub">AI Retinal Analysis</span>
+        </div>
+      </a>
+      <nav class="navbar__nav">
+        <a href="index.html" class="navbar__link">Home</a>
+        <a href="predict.html" class="navbar__link">Predict</a>
+        <a href="how-it-works.html" class="navbar__link">How It Works</a>
+        <a href="features.html" class="navbar__link">Features</a>
+        <a href="about.html" class="navbar__link">About</a>
+        <a href="team.html" class="navbar__link active">Team</a>
+        <a href="contact.html" class="navbar__link">Contact</a>
+      </nav>
+      <a href="predict.html" class="btn btn--primary btn--sm navbar__cta"><i class="fas fa-eye"></i> Try Now</a>
+      <button class="navbar__hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <div class="navbar__mobile" id="mobileNav">
+      <a href="index.html" class="navbar__link">Home</a>
+      <a href="predict.html" class="navbar__link">Predict</a>
+      <a href="how-it-works.html" class="navbar__link">How It Works</a>
+      <a href="features.html" class="navbar__link">Features</a>
+      <a href="about.html" class="navbar__link">About</a>
+      <a href="team.html" class="navbar__link">Team</a>
+      <a href="contact.html" class="navbar__link">Contact</a>
+    </div>
+  </nav>
+
+  <!-- PAGE HERO -->
+  <div class="page-hero">
+    <div class="container">
+      <nav class="breadcrumb">
+        <a href="index.html">Home</a>
+        <i class="fas fa-chevron-right" style="font-size:0.7rem"></i>
+        <span>Team</span>
+      </nav>
+      <div class="section-badge" style="margin-inline:auto;display:inline-flex;">The People</div>
+      <h1 style="margin-top:12px;">Meet the <span class="text-gradient">Team</span></h1>
+      <p>The passionate Computer Science students who built NetraVision — each bringing unique expertise to the project.
+      </p>
+    </div>
+  </div>
+
+  <!-- PROJECT ROLES -->
+  <section class="section section--sm" style="background:var(--clr-bg-secondary);">
+    <div class="container">
+      <div class="section-header" data-reveal>
+        <div class="section-badge">Project Structure</div>
+        <h2>Team <span class="text-gradient">Responsibilities</span></h2>
+        <div class="section-divider"></div>
+      </div>
+      <div class="roles-grid">
+        <div class="role-card" data-reveal data-reveal-delay="1">
+          <div class="role-num">M1</div>
+          <div class="role-title">Dataset &amp; Preprocessing</div>
+          <div class="role-desc">Dataset collection, cleaning, augmentation, and preprocessing pipeline</div>
+        </div>
+        <div class="role-card" data-reveal data-reveal-delay="2">
+          <div class="role-num">M2</div>
+          <div class="role-title">Model Training</div>
+          <div class="role-desc">CNN architecture design, model training, validation, and evaluation</div>
+        </div>
+        <div class="role-card" data-reveal data-reveal-delay="3">
+          <div class="role-num">M3</div>
+          <div class="role-title">Frontend Development</div>
+          <div class="role-desc">UI/UX design, all web pages, responsive layouts, and interactions</div>
+        </div>
+        <div class="role-card" data-reveal data-reveal-delay="4">
+          <div class="role-num">M4</div>
+          <div class="role-title">Backend &amp; API</div>
+          <div class="role-desc">Flask server, REST API, model integration, and deployment</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TEAM MEMBER CARDS -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header" data-reveal>
+        <div class="section-badge">Our Members</div>
+        <h2>The <span class="text-gradient">NetraVision Team</span></h2>
+        <div class="section-divider"></div>
+        <p>Update the names, roles, bios, photos, and social links below with real team information.</p>
+      </div>
+
+      <div class="team-grid">
+
+        <!-- Member 1 — Dataset & Preprocessing -->
+        <div class="team-card team-card--featured" data-reveal data-reveal-delay="1">
+          <div class="team-card__image-wrap">
+            <img src="assets/images/team_placeholder.jpg" alt="Member 1 — Dataset Specialist" />
+            <div class="team-card__image-overlay"></div>
+            <div class="team-card__role-badge">Member 1</div>
+          </div>
+          <div class="team-card__body">
+            <div class="team-card__name">Member 1 Name</div>
+            <div class="team-card__role">Dataset &amp; Preprocessing Specialist</div>
+            <div class="team-card__bio">Responsible for collecting, annotating, cleaning, and augmenting the retinal
+              image dataset. Designed the preprocessing pipeline including CLAHE enhancement and normalization.</div>
+            <div class="team-card__skills">
+              <span class="skill-tag">Python</span>
+              <span class="skill-tag">OpenCV</span>
+              <span class="skill-tag">NumPy</span>
+              <span class="skill-tag">Pandas</span>
+              <span class="skill-tag">Data Augmentation</span>
+            </div>
+            <div class="team-card__social">
+              <a href="#" class="team-social-link" aria-label="GitHub"><i class="fab fa-github"></i></a>
+              <a href="#" class="team-social-link" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+              <a href="#" class="team-social-link" aria-label="Email"><i class="fas fa-envelope"></i></a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Member 2 — Model Training -->
+        <div class="team-card" data-reveal data-reveal-delay="2">
+          <div class="team-card__image-wrap">
+            <img src="assets/images/team_placeholder.jpg" alt="Member 2 — AI Engineer" />
+            <div class="team-card__image-overlay"></div>
+            <div class="team-card__role-badge">Member 2</div>
+          </div>
+          <div class="team-card__body">
+            <div class="team-card__name">Member 2 Name</div>
+            <div class="team-card__role">AI / Machine Learning Engineer</div>
+            <div class="team-card__bio">Designed and trained the CNN architecture using TensorFlow and Keras.
+              Implemented transfer learning, hyperparameter tuning, and evaluation using Quadratic Weighted Kappa and
+              accuracy metrics.</div>
+            <div class="team-card__skills">
+              <span class="skill-tag">TensorFlow</span>
+              <span class="skill-tag">Keras</span>
+              <span class="skill-tag">EfficientNet</span>
+              <span class="skill-tag">Scikit-learn</span>
+              <span class="skill-tag">Model Evaluation</span>
+            </div>
+            <div class="team-card__social">
+              <a href="#" class="team-social-link" aria-label="GitHub"><i class="fab fa-github"></i></a>
+              <a href="#" class="team-social-link" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+              <a href="#" class="team-social-link" aria-label="Email"><i class="fas fa-envelope"></i></a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Member 3 — Frontend (YOU) -->
+        <div class="team-card team-card--featured" data-reveal data-reveal-delay="3"
+          style="border-color:rgba(14,165,233,0.45);box-shadow:0 0 40px rgba(14,165,233,0.12);">
+          <div class="team-card__image-wrap">
+            <img src="assets/images/team_placeholder.jpg" alt="Member 3 — Frontend Developer" />
+            <div class="team-card__image-overlay"></div>
+            <div class="team-card__role-badge"
+              style="background:rgba(14,165,233,0.25);border-color:rgba(14,165,233,0.5);">Member 3 · You</div>
+          </div>
+          <div class="team-card__body">
+            <div class="team-card__name">Your Name Here</div>
+            <div class="team-card__role">Frontend Developer &amp; UI/UX Designer</div>
+            <div class="team-card__bio">Designed and built all 8 web pages of NetraVision from scratch. Created the
+              complete design system, image upload interface, results visualization, responsive layouts, and all
+              frontend interactions.</div>
+            <div class="team-card__skills">
+              <span class="skill-tag">HTML5</span>
+              <span class="skill-tag">CSS3</span>
+              <span class="skill-tag">Vanilla JS</span>
+              <span class="skill-tag">UI/UX Design</span>
+              <span class="skill-tag">Responsive Design</span>
+            </div>
+            <div class="team-card__social">
+              <a href="#" class="team-social-link" aria-label="GitHub"><i class="fab fa-github"></i></a>
+              <a href="#" class="team-social-link" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+              <a href="#" class="team-social-link" aria-label="Portfolio"><i class="fas fa-globe"></i></a>
+              <a href="#" class="team-social-link" aria-label="Email"><i class="fas fa-envelope"></i></a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Member 4 — Backend -->
+        <div class="team-card" data-reveal data-reveal-delay="4">
+          <div class="team-card__image-wrap">
+            <img src="assets/images/team_placeholder.jpg" alt="Member 4 — Backend Developer" />
+            <div class="team-card__image-overlay"></div>
+            <div class="team-card__role-badge">Member 4</div>
+          </div>
+          <div class="team-card__body">
+            <div class="team-card__name">Member 4 Name</div>
+            <div class="team-card__role">Backend Developer &amp; DevOps</div>
+            <div class="team-card__bio">Built the Flask REST API that serves the trained CNN model, handles image
+              processing requests, and returns prediction JSON responses. Also responsible for deployment and server
+              configuration.</div>
+            <div class="team-card__skills">
+              <span class="skill-tag">Flask</span>
+              <span class="skill-tag">Python</span>
+              <span class="skill-tag">REST API</span>
+              <span class="skill-tag">Docker</span>
+              <span class="skill-tag">Deployment</span>
+            </div>
+            <div class="team-card__social">
+              <a href="#" class="team-social-link" aria-label="GitHub"><i class="fab fa-github"></i></a>
+              <a href="#" class="team-social-link" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+              <a href="#" class="team-social-link" aria-label="Email"><i class="fas fa-envelope"></i></a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Advisor / Guide (optional) -->
+        <div class="team-card" data-reveal data-reveal-delay="5" style="grid-column: 2 / 3;">
+          <div class="team-card__image-wrap" style="height:200px;">
+            <img src="assets/images/logo_bg.jpg" alt="Project Advisor" style="object-position:center;" />
+            <div class="team-card__image-overlay"></div>
+            <div class="team-card__role-badge"
+              style="background:rgba(168,85,247,0.15);border-color:rgba(168,85,247,0.3);color:#c084fc;">Advisor</div>
+          </div>
+          <div class="team-card__body">
+            <div class="team-card__name">Project Guide / Advisor</div>
+            <div class="team-card__role" style="color:#c084fc;">Faculty Advisor &amp; Mentor</div>
+            <div class="team-card__bio">Provided expert guidance on CNN model selection, dataset methodology, and
+              project architecture. Supervised the research and reviewed technical documentation.</div>
+            <div class="team-card__skills">
+              <span class="skill-tag">AI/ML Research</span>
+              <span class="skill-tag">Healthcare AI</span>
+              <span class="skill-tag">Mentorship</span>
+            </div>
+            <div class="team-card__social">
+              <a href="#" class="team-social-link" aria-label="Email"><i class="fas fa-envelope"></i></a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div class="footer__brand">
+          <a href="index.html" class="navbar__logo" style="display:inline-flex;margin-bottom:8px;">
+            <div class="navbar__logo-icon"><img src="assets/images/logo_bg.jpg" alt="NetraVision" /></div>
+            <div><span class="navbar__logo-text">NetraVision</span><span class="navbar__logo-sub">AI Retinal
+                Analysis</span></div>
+          </a>
+          <p>AI-powered diabetic retinopathy detection. Educational research project.</p>
+          <div class="footer__social" style="margin-top:20px;">
+            <a href="#" class="social-icon"><i class="fab fa-github"></i></a>
+            <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+          </div>
+        </div>
+        <div>
+          <div class="footer__heading">Navigation</div>
+          <nav class="footer__links">
+            <a href="index.html">Home</a><a href="predict.html">Predict</a>
+            <a href="how-it-works.html">How It Works</a><a href="features.html">Features</a>
+          </nav>
+        </div>
+        <div>
+          <div class="footer__heading">Information</div>
+          <nav class="footer__links"><a href="about.html">About</a><a href="team.html">Team</a><a
+              href="contact.html">Contact</a></nav>
+        </div>
+        <div>
+          <div class="footer__heading">Disclaimer</div>
+          <p style="color:var(--clr-text-secondary);font-size:0.85rem;line-height:1.7;">Educational purposes only. Not
+            for clinical use.</p>
+        </div>
+      </div>
+      <div class="glow-line"></div>
+      <div class="footer__bottom">
+        <p>© 2026 NetraVision</p>
+        <p>Made with <span style="color:#ef4444;">❤</span> for better healthcare.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analysis Results — NetraVision</title>
+  <meta name="description" content="View your diabetic retinopathy analysis results from NetraVision's AI model." />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    .results-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 32px;
+      align-items: start;
+    }
+    /* Result card */
+    .result-card {
+      background: var(--clr-bg-card);
+      border: var(--border-card);
+      border-radius: var(--border-radius-xl);
+      padding: 32px;
+      position: relative;
+      overflow: hidden;
+    }
+    .result-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--grad-blue);
+    }
+    .result-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--clr-text-muted);
+      margin-bottom: 8px;
+    }
+    .result-severity {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 800;
+      margin: 8px 0 16px;
+    }
+    .confidence-section { margin: 24px 0; }
+    .confidence-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .confidence-label { font-size: 0.875rem; color: var(--clr-text-secondary); }
+    .confidence-value {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 800;
+      background: var(--grad-blue);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* 5-Level Progress Breakdown */
+    .severity-breakdown { margin-top: 24px; }
+    .severity-breakdown h4 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--clr-text-secondary);
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .breakdown-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .breakdown-name {
+      font-size: 0.8rem;
+      color: var(--clr-text-secondary);
+      min-width: 120px;
+    }
+    .breakdown-bar {
+      flex: 1;
+      height: 6px;
+      background: rgba(14,165,233,0.08);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .breakdown-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 1.2s cubic-bezier(0.4,0,0.2,1) 0.3s;
+    }
+    .breakdown-pct {
+      font-size: 0.8rem;
+      font-weight: 600;
+      min-width: 36px;
+      text-align: right;
+    }
+
+    /* Image */
+    .result-image-wrap {
+      border-radius: var(--border-radius-lg);
+      overflow: hidden;
+      border: var(--border-card);
+      position: relative;
+      background: #000;
+    }
+    .result-image-wrap img {
+      width: 100%;
+      max-height: 340px;
+      object-fit: contain;
+      display: block;
+    }
+    .image-overlay-badge {
+      position: absolute;
+      bottom: 12px; left: 12px;
+      background: rgba(2,11,24,0.85);
+      border: var(--border-card);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 0.75rem;
+      color: var(--clr-text-secondary);
+      backdrop-filter: blur(8px);
+    }
+
+    /* Recommendations */
+    .rec-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-top: 20px;
+    }
+    .rec-card {
+      background: var(--clr-bg-secondary);
+      border: var(--border-card);
+      border-radius: var(--border-radius-md);
+      padding: 20px;
+      transition: border-color var(--transition-base);
+    }
+    .rec-card:hover { border-color: rgba(14,165,233,0.35); }
+    .rec-icon { font-size: 1.3rem; margin-bottom: 10px; }
+    .rec-card h5 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+    .rec-card p { font-size: 0.82rem; color: var(--clr-text-secondary); line-height: 1.5; }
+
+    /* Demo Banner */
+    .demo-banner {
+      background: rgba(99,102,241,0.08);
+      border: 1px solid rgba(99,102,241,0.25);
+      border-radius: var(--border-radius-md);
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.85rem;
+      color: #a5b4fc;
+      margin-bottom: 28px;
+    }
+
+    /* No-result screen */
+    .no-result {
+      text-align: center;
+      padding: 80px 40px;
+    }
+    .no-result i { font-size: 3rem; color: rgba(14,165,233,0.3); margin-bottom: 20px; display: block; }
+    .no-result h2 { font-family: var(--font-display); font-size: 1.5rem; margin-bottom: 12px; }
+    .no-result p { color: var(--clr-text-secondary); margin-bottom: 28px; }
+
+    @media (max-width: 860px) {
+      .results-layout { grid-template-columns: 1fr; }
+      .rec-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="navbar__inner">
+    <a href="index.html" class="navbar__logo">
+      <div class="navbar__logo-icon"><img src="assets/images/logo_bg.jpg" alt="NetraVision" /></div>
+      <div><span class="navbar__logo-text">NetraVision</span><span class="navbar__logo-sub">AI Retinal Analysis</span></div>
+    </a>
+    <nav class="navbar__nav">
+      <a href="index.html"        class="navbar__link">Home</a>
+      <a href="predict.html"      class="navbar__link">Predict</a>
+      <a href="how-it-works.html" class="navbar__link">How It Works</a>
+      <a href="features.html"     class="navbar__link">Features</a>
+      <a href="about.html"        class="navbar__link">About</a>
+      <a href="team.html"         class="navbar__link">Team</a>
+      <a href="contact.html"      class="navbar__link">Contact</a>
+    </nav>
+    <a href="predict.html" class="btn btn--primary btn--sm navbar__cta"><i class="fas fa-eye"></i> Try Now</a>
+    <button class="navbar__hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="navbar__mobile" id="mobileNav">
+    <a href="index.html"        class="navbar__link">Home</a>
+    <a href="predict.html"      class="navbar__link">Predict</a>
+    <a href="how-it-works.html" class="navbar__link">How It Works</a>
+    <a href="features.html"     class="navbar__link">Features</a>
+    <a href="about.html"        class="navbar__link">About</a>
+    <a href="team.html"         class="navbar__link">Team</a>
+    <a href="contact.html"      class="navbar__link">Contact</a>
+  </div>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="container">
+    <nav class="breadcrumb">
+      <a href="index.html">Home</a>
+      <i class="fas fa-chevron-right" style="font-size:0.7rem"></i>
+      <a href="predict.html">Predict</a>
+      <i class="fas fa-chevron-right" style="font-size:0.7rem"></i>
+      <span>Results</span>
+    </nav>
+    <div class="section-badge" style="margin-inline:auto;display:inline-flex;">Analysis Complete</div>
+    <h1 style="margin-top:12px;">Your <span class="text-gradient">Results</span></h1>
+    <p>Review your AI-generated retinopathy classification below. Remember: this is for educational purposes only.</p>
+  </div>
+</div>
+
+<!-- MAIN -->
+<section class="section section--sm">
+  <div class="container">
+
+    <!-- No Result Screen (shown when no session data) -->
+    <div id="noResult" class="hidden">
+      <div class="no-result card">
+        <i class="fas fa-exclamation-circle"></i>
+        <h2>No Analysis Found</h2>
+        <p>Please upload and analyze a retinal image first to see results here.</p>
+        <a href="predict.html" class="btn btn--primary"><i class="fas fa-upload"></i> Upload Image</a>
+      </div>
+    </div>
+
+    <!-- Results (shown when session data exists) -->
+    <div id="resultsContent">
+      <!-- Demo Mode Banner -->
+      <div class="demo-banner">
+        <i class="fas fa-flask" style="flex-shrink:0;"></i>
+        <div>
+          <strong>Demo Mode — Simulated Results</strong> &nbsp;|&nbsp;
+          These results are generated by a demo simulation and do not reflect a real medical analysis.
+          Once the CNN backend is connected, real predictions will appear here.
+        </div>
+      </div>
+
+      <div class="results-layout">
+        <!-- LEFT: Image -->
+        <div>
+          <div class="result-image-wrap" data-reveal>
+            <img id="resultImage" src="assets/images/hero_retina.jpg" alt="Analyzed retinal image" />
+            <div class="image-overlay-badge">
+              <i class="fas fa-eye" style="margin-right:6px;color:var(--clr-blue-light);"></i>
+              <span id="imageName">retinal-scan.jpg</span>
+            </div>
+          </div>
+
+          <!-- Timestamp & Meta -->
+          <div style="margin-top:16px;display:flex;flex-direction:column;gap:8px;">
+            <div style="display:flex;justify-content:space-between;font-size:0.82rem;color:var(--clr-text-muted);">
+              <span><i class="fas fa-clock" style="margin-right:6px;"></i>Analyzed at</span>
+              <span id="resultTimestamp">—</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:0.82rem;color:var(--clr-text-muted);">
+              <span><i class="fas fa-brain" style="margin-right:6px;"></i>Model</span>
+              <span>NetraVision CNN v1.0 (Demo)</span>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div style="display:flex;gap:12px;margin-top:24px;flex-wrap:wrap;">
+            <a href="predict.html" class="btn btn--primary" id="analyzeAnotherBtn">
+              <i class="fas fa-redo"></i> Analyze Another Image
+            </a>
+            <button class="btn btn--outline" id="downloadBtn">
+              <i class="fas fa-download"></i> Download Report
+            </button>
+          </div>
+        </div>
+
+        <!-- RIGHT: Result Info -->
+        <div>
+          <!-- Main Result Card -->
+          <div class="result-card" data-reveal>
+            <div class="result-label">Prediction Result</div>
+
+            <div id="resultBadge" style="margin:12px 0;"></div>
+
+            <div class="result-severity" id="resultSeverity">Mild DR</div>
+
+            <p id="resultDescription" style="color:var(--clr-text-secondary);font-size:0.9rem;line-height:1.7;margin-bottom:20px;">
+              Mild diabetic retinopathy has been detected. Microaneurysms are present in the retina. Regular monitoring and blood sugar control are advised.
+            </p>
+
+            <!-- Confidence Score -->
+            <div class="confidence-section">
+              <div class="confidence-row">
+                <span class="confidence-label">Confidence Score</span>
+                <span class="confidence-value" id="confidenceValue">87.4%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar__fill" id="confidenceFill" style="width:0%"></div>
+              </div>
+            </div>
+
+            <!-- 5-Level Breakdown -->
+            <div class="severity-breakdown">
+              <h4>Class Probability Breakdown</h4>
+              <div id="breakdownRows"></div>
+            </div>
+          </div>
+
+          <!-- Recommendations -->
+          <div style="margin-top:24px;" data-reveal class="delay-2">
+            <h3 style="font-family:var(--font-display);font-size:1.1rem;font-weight:600;margin-bottom:4px;">
+              <i class="fas fa-notes-medical" style="color:var(--clr-blue-light);margin-right:8px;"></i>
+              Recommendations
+            </h3>
+            <p style="color:var(--clr-text-secondary);font-size:0.85rem;margin-bottom:16px;">
+              Based on the classification result — educational guidance only.
+            </p>
+
+            <div class="rec-grid" id="recommendationsGrid"></div>
+
+            <div class="alert alert--warning" style="margin-top:16px;">
+              <i class="fas fa-exclamation-triangle" style="flex-shrink:0;"></i>
+              <div>
+                <strong>Important:</strong> These recommendations are generated automatically for educational purposes.
+                Always consult a qualified ophthalmologist or healthcare provider for medical advice.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div class="footer__brand">
+        <a href="index.html" class="navbar__logo" style="display:inline-flex;margin-bottom:8px;">
+          <div class="navbar__logo-icon"><img src="assets/images/logo_bg.jpg" alt="NetraVision" /></div>
+          <div><span class="navbar__logo-text">NetraVision</span><span class="navbar__logo-sub">AI Retinal Analysis</span></div>
+        </a>
+        <p>AI-powered diabetic retinopathy detection. Educational research project.</p>
+      </div>
+      <div><div class="footer__heading">Navigation</div>
+        <nav class="footer__links">
+          <a href="index.html">Home</a><a href="predict.html">Predict</a>
+          <a href="how-it-works.html">How It Works</a><a href="features.html">Features</a>
+        </nav>
+      </div>
+      <div><div class="footer__heading">Information</div>
+        <nav class="footer__links">
+          <a href="about.html">About</a><a href="team.html">Team</a><a href="contact.html">Contact</a>
+        </nav>
+      </div>
+      <div>
+        <div class="footer__heading">Legal</div>
+        <p style="color:var(--clr-text-secondary);font-size:0.85rem;line-height:1.7;">Educational purposes only. Not for clinical use.</p>
+      </div>
+    </div>
+    <div class="glow-line"></div>
+    <div class="footer__bottom">
+      <p>© 2026 NetraVision</p>
+      <p>Made with <span style="color:#ef4444;">❤</span> for better healthcare.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+/**
+ * results.js (inline) — Reads sessionStorage data from predict.js
+ * and populates the results page UI.
+ */
+(function initResults() {
+  const stored = sessionStorage.getItem('nv_result');
+
+  if (!stored) {
+    document.getElementById('noResult').classList.remove('hidden');
+    document.getElementById('resultsContent').classList.add('hidden');
+    return;
+  }
+
+  const data = JSON.parse(stored);
+
+  // Severity definitions
+  const severityInfo = [
+    {
+      label: 'No DR (Normal)',
+      color: '#10b981',
+      className: 'severity--0',
+      description: 'No signs of diabetic retinopathy detected. The retina appears normal. Maintain good blood sugar control and schedule regular annual eye exams.',
+      recs: [
+        { icon: '🔄', title: 'Annual Eye Exams', text: 'Continue yearly dilated eye exams to monitor retinal health.' },
+        { icon: '🩸', title: 'Blood Sugar Control', text: 'Maintain HbA1c below 7% to prevent future retinopathy.' },
+        { icon: '🥗', title: 'Healthy Lifestyle', text: 'Follow a balanced diet and exercise routine to manage diabetes.' },
+        { icon: '💊', title: 'Medication Adherence', text: 'Take prescribed diabetes medications as directed by your doctor.' },
+      ]
+    },
+    {
+      label: 'Mild DR',
+      color: '#f59e0b',
+      className: 'severity--1',
+      description: 'Mild diabetic retinopathy detected. Microaneurysms are present — small bulges in blood vessels of the retina. Regular monitoring is important.',
+      recs: [
+        { icon: '👁', title: 'Frequent Monitoring', text: 'Schedule eye exams every 6–9 months to track progression.' },
+        { icon: '🩺', title: 'Specialist Referral', text: 'Consult an ophthalmologist for a detailed retinal evaluation.' },
+        { icon: '🩸', title: 'Tighter Glucose Control', text: 'Work with your doctor to improve blood glucose management.' },
+        { icon: '💡', title: 'Early Intervention', text: 'Early treatment at this stage can significantly prevent vision loss.' },
+      ]
+    },
+    {
+      label: 'Moderate DR',
+      color: '#f97316',
+      className: 'severity--2',
+      description: 'Moderate diabetic retinopathy detected. Multiple microaneurysms, hemorrhages, and exudates are present. Prompt medical consultation recommended.',
+      recs: [
+        { icon: '🚑', title: 'Urgent Ophthalmology Visit', text: 'See a retinal specialist within 3 months for assessment.' },
+        { icon: '🔬', title: 'Further Testing', text: 'Fluorescein angiography or OCT may be required for evaluation.' },
+        { icon: '🩸', title: 'Strict Glucose Control', text: 'Intensive diabetes management to slow progression.' },
+        { icon: '💉', title: 'Possible Treatment', text: 'Laser therapy or anti-VEGF injections may be considered.' },
+      ]
+    },
+    {
+      label: 'Severe DR',
+      color: '#ef4444',
+      className: 'severity--3',
+      description: 'Severe diabetic retinopathy detected. Significant retinal ischemia and extensive hemorrhages. Immediate medical attention is strongly recommended.',
+      recs: [
+        { icon: '🆘', title: 'Immediate Consultation', text: 'See a retinal specialist as soon as possible — within weeks.' },
+        { icon: '💉', title: 'Anti-VEGF Treatment', text: 'Intravitreal injections may be required to prevent progression.' },
+        { icon: '🔆', title: 'Laser Photocoagulation', text: 'Pan-retinal photocoagulation (PRP) may be recommended.' },
+        { icon: '🩺', title: 'Systemic Control', text: 'Aggressively control blood pressure, glucose, and cholesterol.' },
+      ]
+    },
+    {
+      label: 'Proliferative DR',
+      color: '#a855f7',
+      className: 'severity--4',
+      description: 'Proliferative diabetic retinopathy detected — the most advanced stage. New abnormal blood vessels are growing. Risk of blindness is high without treatment.',
+      recs: [
+        { icon: '🚨', title: 'Emergency Ophthalmic Care', text: 'Seek urgent specialist care immediately — same day if possible.' },
+        { icon: '🔬', title: 'Vitrectomy', text: 'Surgical intervention may be required to remove vitreous hemorrhage.' },
+        { icon: '💉', title: 'Anti-VEGF Injections', text: 'Repeated anti-VEGF therapy essential to suppress new vessel growth.' },
+        { icon: '🛡', title: 'Vision Preservation', text: 'All treatment options aimed at preserving remaining vision.' },
+      ]
+    },
+  ];
+
+  const level = data.level !== undefined ? data.level : 1;
+  const info = severityInfo[level];
+
+  // Badge
+  const badge = document.getElementById('resultBadge');
+  if (badge) {
+    badge.innerHTML = `<span class="severity-badge ${info.className}">
+      <span style="width:8px;height:8px;border-radius:50%;background:${info.color};display:inline-block;"></span>
+      Level ${level}
+    </span>`;
+  }
+
+  // Severity label
+  const sevEl = document.getElementById('resultSeverity');
+  if (sevEl) { sevEl.textContent = info.label; sevEl.style.color = info.color; }
+
+  // Description
+  const descEl = document.getElementById('resultDescription');
+  if (descEl) descEl.textContent = info.description;
+
+  // Confidence
+  const conf = data.confidence || 87.4;
+  const confEl = document.getElementById('confidenceValue');
+  if (confEl) confEl.textContent = conf.toFixed(1) + '%';
+
+  // Confidence bar (animate after render)
+  setTimeout(() => {
+    const fill = document.getElementById('confidenceFill');
+    if (fill) fill.style.width = conf + '%';
+  }, 200);
+
+  // Timestamp
+  const tsEl = document.getElementById('resultTimestamp');
+  if (tsEl && data.timestamp) {
+    tsEl.textContent = new Date(data.timestamp).toLocaleString();
+  }
+
+  // Image
+  const imgEl = document.getElementById('resultImage');
+  if (imgEl && data.imageData) imgEl.src = data.imageData;
+
+  // Filename
+  const nameEl = document.getElementById('imageName');
+  if (nameEl && data.imageName) nameEl.textContent = data.imageName;
+
+  // Breakdown (simulated probabilities)
+  const probs = generateProbabilities(level, conf);
+  const breakdownContainer = document.getElementById('breakdownRows');
+  if (breakdownContainer) {
+    const colors = ['#10b981','#f59e0b','#f97316','#ef4444','#a855f7'];
+    const labels = ['No DR','Mild DR','Moderate DR','Severe DR','Prolif. DR'];
+    breakdownContainer.innerHTML = probs.map((p, i) => `
+      <div class="breakdown-row">
+        <span class="breakdown-name" style="color:${colors[i]}">${labels[i]}</span>
+        <div class="breakdown-bar">
+          <div class="breakdown-fill" style="width:0%;background:${colors[i]};" data-target="${p}"></div>
+        </div>
+        <span class="breakdown-pct" style="color:${colors[i]}">${p.toFixed(1)}%</span>
+      </div>
+    `).join('');
+    // Animate fills
+    setTimeout(() => {
+      breakdownContainer.querySelectorAll('.breakdown-fill').forEach(el => {
+        el.style.width = el.dataset.target + '%';
+      });
+    }, 400);
+  }
+
+  // Recommendations
+  const recGrid = document.getElementById('recommendationsGrid');
+  if (recGrid) {
+    recGrid.innerHTML = info.recs.map(r => `
+      <div class="rec-card">
+        <div class="rec-icon">${r.icon}</div>
+        <h5>${r.title}</h5>
+        <p>${r.text}</p>
+      </div>
+    `).join('');
+  }
+
+  // Download Report Button
+  const dlBtn = document.getElementById('downloadBtn');
+  if (dlBtn) {
+    dlBtn.addEventListener('click', () => downloadReport(data, info, conf, probs));
+  }
+})();
+
+// Generate plausible probability distribution
+function generateProbabilities(level, confidence) {
+  const probs = [5, 5, 5, 5, 5];
+  probs[level] = confidence;
+  const remaining = 100 - confidence;
+  const others = [0,1,2,3,4].filter(i => i !== level);
+  let distributed = 0;
+  others.forEach((i, idx) => {
+    const share = idx < others.length - 1
+      ? parseFloat((remaining * Math.random() * 0.4 + 0.05).toFixed(1))
+      : parseFloat((remaining - distributed).toFixed(1));
+    probs[i] = Math.max(0, share);
+    distributed += share;
+  });
+  // Normalize
+  const total = probs.reduce((a,b) => a+b, 0);
+  return probs.map(p => parseFloat(((p / total) * 100).toFixed(1)));
+}
+
+// Download simple text report
+function downloadReport(data, info, conf, probs) {
+  const labels = ['No DR (Normal)','Mild DR','Moderate DR','Severe DR','Proliferative DR'];
+  const report = `
+NETRAVISION — AI RETINAL ANALYSIS REPORT
+==========================================
+Date: ${new Date(data.timestamp).toLocaleString()}
+Image: ${data.imageName || 'N/A'}
+Model: NetraVision CNN v1.0 (Demo Mode)
+
+RESULT
+------
+Severity Level : ${data.level} — ${info.label}
+Confidence     : ${conf.toFixed(1)}%
+
+CLASS PROBABILITIES
+-------------------
+${labels.map((l, i) => `${l.padEnd(20)}: ${(probs[i] || 0).toFixed(1)}%`).join('\n')}
+
+DESCRIPTION
+-----------
+${info.description}
+
+RECOMMENDATIONS
+---------------
+${info.recs.map(r => `• ${r.title}: ${r.text}`).join('\n')}
+
+DISCLAIMER
+----------
+This report is generated by NetraVision, a college research project.
+Results are simulated in DEMO MODE and are NOT a substitute for a
+professional medical diagnosis. Always consult a qualified ophthalmologist.
+
+==========================================
+© 2026 NetraVision
+`.trim();
+
+  const blob = new Blob([report], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `NetraVision_Report_${Date.now()}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+  window.NetraVision && window.NetraVision.showToast('Report downloaded!', 'success');
+}
+</script>
+</body>
+</html>

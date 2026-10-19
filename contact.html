@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact — NetraVision | Get in Touch</title>
+  <meta name="description" content="Contact the NetraVision team with questions, feedback, or collaboration inquiries." />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    .contact-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 48px;
+      align-items: start;
+    }
+    /* Info Cards */
+    .info-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 18px;
+      padding: 22px 24px;
+      background: var(--clr-bg-card);
+      border: var(--border-card);
+      border-radius: var(--border-radius-lg);
+      margin-bottom: 16px;
+      transition: border-color var(--transition-base), transform var(--transition-base);
+    }
+    .info-card:hover {
+      border-color: rgba(14,165,233,0.35);
+      transform: translateX(4px);
+    }
+    .info-icon {
+      width: 48px; height: 48px;
+      border-radius: var(--border-radius-md);
+      background: rgba(14,165,233,0.1);
+      border: 1px solid rgba(14,165,233,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+    .info-card h4 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--clr-blue-light);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .info-card p {
+      font-size: 0.9rem;
+      color: var(--clr-text-secondary);
+      line-height: 1.5;
+    }
+    .info-card a { color: var(--clr-blue-light); transition: color var(--transition-fast); }
+    .info-card a:hover { color: var(--clr-cyan-light); }
+
+    /* Contact Form */
+    .contact-form-card {
+      background: var(--clr-bg-card);
+      border: var(--border-card);
+      border-radius: var(--border-radius-xl);
+      padding: 40px;
+      position: relative;
+      overflow: hidden;
+    }
+    .contact-form-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: var(--grad-blue);
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .form-group { margin-bottom: 20px; }
+    .form-group label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--clr-text-secondary);
+      margin-bottom: 8px;
+    }
+    .form-group label .required { color: var(--clr-danger); margin-left: 2px; }
+    .char-count {
+      float: right;
+      font-size: 0.75rem;
+      color: var(--clr-text-muted);
+    }
+    .form-error {
+      font-size: 0.78rem;
+      color: var(--clr-danger);
+      margin-top: 5px;
+      display: none;
+    }
+    .form-error.visible { display: block; }
+
+    /* Success / Error Message */
+    .form-feedback {
+      padding: 20px;
+      border-radius: var(--border-radius-md);
+      text-align: center;
+      display: none;
+      margin-top: 16px;
+    }
+    .form-feedback.success {
+      background: rgba(16,185,129,0.1);
+      border: 1px solid rgba(16,185,129,0.3);
+      color: #34d399;
+    }
+    .form-feedback.error {
+      background: rgba(239,68,68,0.08);
+      border: 1px solid rgba(239,68,68,0.3);
+      color: #f87171;
+    }
+    .form-feedback i { font-size: 2rem; margin-bottom: 10px; display: block; }
+    .form-feedback h3 { font-family: var(--font-display); font-size: 1.1rem; margin-bottom: 6px; }
+    .form-feedback p { font-size: 0.875rem; opacity: 0.9; }
+
+    /* Map placeholder */
+    .map-placeholder {
+      width: 100%;
+      height: 200px;
+      border-radius: var(--border-radius-lg);
+      background: var(--clr-bg-card);
+      border: var(--border-card);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: var(--clr-text-muted);
+      font-size: 0.85rem;
+    }
+    .map-placeholder i { font-size: 2rem; color: rgba(14,165,233,0.3); }
+
+    @media (max-width: 860px) {
+      .contact-layout { grid-template-columns: 1fr; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="navbar__inner">
+    <a href="index.html" class="navbar__logo">
+      <div class="navbar__logo-icon"><img src="assets/images/logo_bg.jpg" alt="NetraVision" /></div>
+      <div><span class="navbar__logo-text">NetraVision</span><span class="navbar__logo-sub">AI Retinal Analysis</span></div>
+    </a>
+    <nav class="navbar__nav">
+      <a href="index.html"        class="navbar__link">Home</a>
+      <a href="predict.html"      class="navbar__link">Predict</a>
+      <a href="how-it-works.html" class="navbar__link">How It Works</a>
+      <a href="features.html"     class="navbar__link">Features</a>
+      <a href="about.html"        class="navbar__link">About</a>
+      <a href="team.html"         class="navbar__link">Team</a>
+      <a href="contact.html"      class="navbar__link active">Contact</a>
+    </nav>
+    <a href="predict.html" class="btn btn--primary btn--sm navbar__cta"><i class="fas fa-eye"></i> Try Now</a>
+    <button class="navbar__hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+  <div class="navbar__mobile" id="mobileNav">
+    <a href="index.html"        class="navbar__link">Home</a>
+    <a href="predict.html"      class="navbar__link">Predict</a>
+    <a href="how-it-works.html" class="navbar__link">How It Works</a>
+    <a href="features.html"     class="navbar__link">Features</a>
+    <a href="about.html"        class="navbar__link">About</a>
+    <a href="team.html"         class="navbar__link">Team</a>
+    <a href="contact.html"      class="navbar__link">Contact</a>
+  </div>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="container">
+    <nav class="breadcrumb">
+      <a href="index.html">Home</a>
+      <i class="fas fa-chevron-right" style="font-size:0.7rem"></i>
+      <span>Contact</span>
+    </nav>
+    <div class="section-badge" style="margin-inline:auto;display:inline-flex;">Get in Touch</div>
+    <h1 style="margin-top:12px;">Contact <span class="text-gradient">Us</span></h1>
+    <p>Have questions about NetraVision, or want to collaborate or give feedback? We'd love to hear from you.</p>
+  </div>
+</div>
+
+<!-- CONTACT SECTION -->
+<section class="section section--sm">
+  <div class="container">
+    <div class="contact-layout">
+
+      <!-- LEFT: Contact Info -->
+      <div>
+        <div data-reveal>
+          <div class="section-badge">Contact Info</div>
+          <h2 style="font-family:var(--font-display);font-size:1.8rem;font-weight:700;margin:12px 0 24px;">
+            Let's <span class="text-gradient">Connect</span>
+          </h2>
+        </div>
+
+        <div class="info-card" data-reveal data-reveal-delay="1">
+          <div class="info-icon"><i class="fas fa-envelope" style="color:var(--clr-blue-light);"></i></div>
+          <div>
+            <h4>Email</h4>
+            <p><a href="mailto:team@netravision.edu">team@netravision.edu</a><br/>
+            <a href="mailto:feedback@netravision.edu">feedback@netravision.edu</a></p>
+          </div>
+        </div>
+
+        <div class="info-card" data-reveal data-reveal-delay="2">
+          <div class="info-icon"><i class="fas fa-university" style="color:var(--clr-cyan-light);"></i></div>
+          <div>
+            <h4>Institution</h4>
+            <p>Department of Computer Science<br/>
+            [Your College Name Here]<br/>
+            [City, State, Country]</p>
+          </div>
+        </div>
+
+        <div class="info-card" data-reveal data-reveal-delay="3">
+          <div class="info-icon"><i class="fab fa-github" style="color:var(--clr-blue-light);"></i></div>
+          <div>
+            <h4>GitHub Repository</h4>
+            <p><a href="https://github.com/your-repo" target="_blank" rel="noopener">github.com/your-team/netravision</a></p>
+          </div>
+        </div>
+
+        <div class="info-card" data-reveal data-reveal-delay="4">
+          <div class="info-icon"><i class="fas fa-clock" style="color:var(--clr-cyan-light);"></i></div>
+          <div>
+            <h4>Response Time</h4>
+            <p>We typically respond within 2–3 business days. This is a college project with limited availability.</p>
+          </div>
+        </div>
+
+        <!-- Social -->
+        <div data-reveal style="margin-top:24px;">
+          <h4 style="font-size:0.85rem;font-weight:600;color:var(--clr-text-secondary);margin-bottom:14px;text-transform:uppercase;letter-spacing:1px;">Follow Our Work</h4>
+          <div style="display:flex;gap:12px;">
+            <a href="#" class="social-icon" aria-label="GitHub"><i class="fab fa-github"></i></a>
+            <a href="#" class="social-icon" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#" class="social-icon" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" class="social-icon" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+          </div>
+        </div>
+
+        <!-- Map Placeholder -->
+        <div class="map-placeholder mt-sm" data-reveal>
+          <i class="fas fa-map-marker-alt"></i>
+          <span>Campus Location Map</span>
+          <span style="font-size:0.75rem;">[Add Google Maps embed here]</span>
+        </div>
+      </div>
+
+      <!-- RIGHT: Contact Form -->
+      <div class="contact-form-card" data-reveal>
+        <h3 style="font-family:var(--font-display);font-size:1.4rem;font-weight:700;margin-bottom:6px;">
+          Send us a <span class="text-gradient">Message</span>
+        </h3>
+        <p style="color:var(--clr-text-secondary);font-size:0.9rem;margin-bottom:28px;">
+          Fill out the form below and we'll get back to you as soon as possible.
+        </p>
+
+        <form id="contactForm" novalidate>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="contactName">Full Name <span class="required">*</span></label>
+              <input type="text" id="contactName" name="name" class="form-control" placeholder="Your full name" autocomplete="name" />
+              <div class="form-error" id="nameError">Please enter your full name.</div>
+            </div>
+            <div class="form-group">
+              <label for="contactEmail">Email Address <span class="required">*</span></label>
+              <input type="email" id="contactEmail" name="email" class="form-control" placeholder="you@example.com" autocomplete="email" />
+              <div class="form-error" id="emailError">Please enter a valid email address.</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="contactSubject">Subject <span class="required">*</span></label>
+            <select id="contactSubject" name="subject" class="form-control">
+              <option value="" disabled selected>Select a subject…</option>
+              <option value="general">General Enquiry</option>
+              <option value="feedback">Feedback &amp; Suggestions</option>
+              <option value="collaboration">Collaboration Opportunity</option>
+              <option value="bug">Bug Report / Technical Issue</option>
+              <option value="medical">Medical / Accuracy Concern</option>
+              <option value="other">Other</option>
+            </select>
+            <div class="form-error" id="subjectError">Please select a subject.</div>
+          </div>
+
+          <div class="form-group">
+            <label for="contactMessage">
+              Message <span class="required">*</span>
+              <span class="char-count"><span id="charCount">0</span>/500</span>
+            </label>
+            <textarea id="contactMessage" name="message" class="form-control" placeholder="Write your message here…" maxlength="500" rows="6"></textarea>
+            <div class="form-error" id="messageError">Please enter a message (at least 20 characters).</div>
+          </div>
+
+          <div class="form-group" style="display:flex;align-items:flex-start;gap:12px;">
+            <input type="checkbox" id="privacyCheck" name="privacy" style="margin-top:2px;accent-color:var(--clr-blue-primary);" />
+            <label for="privacyCheck" style="font-size:0.85rem;cursor:pointer;">
+              I understand that NetraVision is an educational project and this form does not constitute a medical consultation.
+            </label>
+          </div>
+          <div class="form-error" id="privacyError">Please acknowledge the disclaimer above.</div>
+
+          <button type="submit" class="btn btn--primary btn--lg w-full" id="submitBtn">
+            <i class="fas fa-paper-plane"></i> Send Message
+          </button>
+        </form>
+
+        <!-- Feedback Messages -->
+        <div class="form-feedback success" id="successFeedback">
+          <i class="fas fa-check-circle"></i>
+          <h3>Message Sent!</h3>
+          <p>Thank you for reaching out. We'll get back to you within 2–3 business days.</p>
+        </div>
+        <div class="form-feedback error" id="errorFeedback">
+          <i class="fas fa-times-circle"></i>
+          <h3>Something went wrong</h3>
+          <p>Please check the form and try again, or email us directly.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- FAQ QUICK LINKS -->
+<section class="section section--sm" style="background:var(--clr-bg-secondary);">
+  <div class="container">
+    <div class="section-header" data-reveal>
+      <div class="section-badge">Before You Write</div>
+      <h2>Common <span class="text-gradient">Questions</span></h2>
+      <div class="section-divider"></div>
+    </div>
+    <div class="grid-3" style="gap:24px;">
+      <div class="card" data-reveal data-reveal-delay="1">
+        <div class="card__icon"><i class="fas fa-question-circle" style="color:var(--clr-blue-light)"></i></div>
+        <h3>How accurate is the AI?</h3>
+        <p>NetraVision achieves competitive accuracy on the APTOS test set. See the <a href="how-it-works.html" style="color:var(--clr-blue-light);">How It Works</a> page for details.</p>
+      </div>
+      <div class="card" data-reveal data-reveal-delay="2">
+        <div class="card__icon"><i class="fas fa-user-md" style="color:var(--clr-cyan-light)"></i></div>
+        <h3>Can I use this medically?</h3>
+        <p>No. NetraVision is strictly for educational and research use. Always consult a qualified ophthalmologist for any medical concerns.</p>
+      </div>
+      <div class="card" data-reveal data-reveal-delay="3">
+        <div class="card__icon"><i class="fas fa-code-branch" style="color:var(--clr-blue-light)"></i></div>
+        <h3>Can I contribute or fork it?</h3>
+        <p>Yes! Check out our GitHub repository. Contributions, suggestions, and academic collaboration are welcome.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div class="footer__brand">
+        <a href="index.html" class="navbar__logo" style="display:inline-flex;margin-bottom:8px;">
+          <div class="navbar__logo-icon"><img src="assets/images/logo_bg.jpg" alt="NetraVision" /></div>
+          <div><span class="navbar__logo-text">NetraVision</span><span class="navbar__logo-sub">AI Retinal Analysis</span></div>
+        </a>
+        <p>AI-powered diabetic retinopathy detection. Educational research project.</p>
+        <div class="footer__social" style="margin-top:20px;">
+          <a href="#" class="social-icon"><i class="fab fa-github"></i></a>
+          <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
+        </div>
+      </div>
+      <div><div class="footer__heading">Navigation</div>
+        <nav class="footer__links">
+          <a href="index.html">Home</a><a href="predict.html">Predict</a>
+          <a href="how-it-works.html">How It Works</a><a href="features.html">Features</a>
+        </nav>
+      </div>
+      <div><div class="footer__heading">Information</div>
+        <nav class="footer__links"><a href="about.html">About</a><a href="team.html">Team</a><a href="contact.html">Contact</a></nav>
+      </div>
+      <div>
+        <div class="footer__heading">Disclaimer</div>
+        <p style="color:var(--clr-text-secondary);font-size:0.85rem;line-height:1.7;">Educational purposes only. Not for clinical use.</p>
+      </div>
+    </div>
+    <div class="glow-line"></div>
+    <div class="footer__bottom">
+      <p>© 2026 NetraVision</p>
+      <p>Made with <span style="color:#ef4444;">❤</span> for better healthcare.</p>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+/**
+ * Contact Form — Validation & Submission
+ */
+(function initContactForm() {
+  const form        = document.getElementById('contactForm');
+  const nameEl      = document.getElementById('contactName');
+  const emailEl     = document.getElementById('contactEmail');
+  const subjectEl   = document.getElementById('contactSubject');
+  const messageEl   = document.getElementById('contactMessage');
+  const privacyEl   = document.getElementById('privacyCheck');
+  const charCount   = document.getElementById('charCount');
+  const submitBtn   = document.getElementById('submitBtn');
+  const successFb   = document.getElementById('successFeedback');
+  const errorFb     = document.getElementById('errorFeedback');
+
+  // Character counter for message
+  messageEl.addEventListener('input', () => {
+    charCount.textContent = messageEl.value.length;
+  });
+
+  function showError(id, show) {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('visible', show);
+  }
+  function markField(el, invalid) {
+    if (invalid) {
+      el.style.borderColor = 'rgba(239,68,68,0.5)';
+      el.style.boxShadow   = '0 0 0 3px rgba(239,68,68,0.1)';
+    } else {
+      el.style.borderColor = 'rgba(16,185,129,0.5)';
+      el.style.boxShadow   = '0 0 0 3px rgba(16,185,129,0.08)';
+    }
+  }
+
+  function validateEmail(v) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    let valid = true;
+
+    // Name
+    const nameVal = nameEl.value.trim();
+    const nameInvalid = nameVal.length < 2;
+    showError('nameError', nameInvalid);
+    markField(nameEl, nameInvalid);
+    if (nameInvalid) valid = false;
+
+    // Email
+    const emailInvalid = !validateEmail(emailEl.value.trim());
+    showError('emailError', emailInvalid);
+    markField(emailEl, emailInvalid);
+    if (emailInvalid) valid = false;
+
+    // Subject
+    const subjectInvalid = !subjectEl.value;
+    showError('subjectError', subjectInvalid);
+    markField(subjectEl, subjectInvalid);
+    if (subjectInvalid) valid = false;
+
+    // Message
+    const msgVal = messageEl.value.trim();
+    const msgInvalid = msgVal.length < 20;
+    showError('messageError', msgInvalid);
+    markField(messageEl, msgInvalid);
+    if (msgInvalid) valid = false;
+
+    // Privacy
+    const privacyInvalid = !privacyEl.checked;
+    showError('privacyError', privacyInvalid);
+    if (privacyInvalid) valid = false;
+
+    if (!valid) {
+      window.NetraVision && window.NetraVision.showToast('Please fix the errors in the form.', 'error');
+      return;
+    }
+
+    // Simulate form submission
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner"></span> Sending…';
+
+    setTimeout(() => {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
+      form.reset();
+      charCount.textContent = '0';
+      successFb.style.display = 'block';
+      window.NetraVision && window.NetraVision.showToast('Message sent successfully!', 'success');
+
+      // Reset field styles
+      [nameEl, emailEl, subjectEl, messageEl].forEach(el => {
+        el.style.borderColor = '';
+        el.style.boxShadow   = '';
+      });
+
+      // Scroll to success feedback
+      successFb.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      // Auto-hide after 8s
+      setTimeout(() => {
+        successFb.style.display = 'none';
+      }, 8000);
+    }, 1500);
+  });
+
+  // Real-time validation on blur
+  nameEl.addEventListener('blur', () => {
+    const invalid = nameEl.value.trim().length < 2;
+    showError('nameError', invalid);
+    markField(nameEl, invalid);
+  });
+  emailEl.addEventListener('blur', () => {
+    const invalid = !validateEmail(emailEl.value.trim());
+    showError('emailError', invalid);
+    markField(emailEl, invalid);
+  });
+})();
+</script>
+</body>
+</html>
