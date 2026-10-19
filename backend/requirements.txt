@@ -1,0 +1,6 @@
+Flask==2.3.3
+flask-cors==4.0.0
+Pillow==10.2.0
+numpy==1.26.4
+# TensorFlow is optional – only needed when the real model is available.
+# tensorflow==2.16.1
