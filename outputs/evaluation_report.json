@@ -1,0 +1,194 @@
+{
+  "metadata": {
+    "evaluation_timestamp": "2026-11-03 13:57:35",
+    "model_path": "D:\\aptos2019-blindness-detection\\outputs\\best_model.pth",
+    "checkpoint_epoch": 13,
+    "compute_device": "CPU (8 worker threads)",
+    "total_val_samples": 733,
+    "total_train_samples": 2929,
+    "random_seed": 42,
+    "val_split": 0.2,
+    "train_val_overlap_count": 0,
+    "preprocessing": "Ben Graham fundus normalization (crop_image_from_gray + Gaussian blur subtract + ImageNet norm)"
+  },
+  "overall_metrics": {
+    "accuracy": 0.7299,
+    "accuracy_percentage": 72.99,
+    "quadratic_weighted_kappa": 0.831,
+    "macro_f1": 0.5766,
+    "weighted_f1": 0.7418,
+    "total_correct": 535,
+    "total_evaluated": 733
+  },
+  "per_class_metrics": {
+    "No DR": {
+      "precision": 0.9624,
+      "recall": 0.9224,
+      "f1_score": 0.942,
+      "support": 361
+    },
+    "Mild": {
+      "precision": 0.4,
+      "recall": 0.6216,
+      "f1_score": 0.4868,
+      "support": 74
+    },
+    "Moderate": {
+      "precision": 0.7303,
+      "recall": 0.555,
+      "f1_score": 0.6307,
+      "support": 200
+    },
+    "Severe": {
+      "precision": 0.2794,
+      "recall": 0.4872,
+      "f1_score": 0.3551,
+      "support": 39
+    },
+    "Proliferative DR": {
+      "precision": 0.5,
+      "recall": 0.4407,
+      "f1_score": 0.4685,
+      "support": 59
+    }
+  },
+  "confusion_matrix": {
+    "labels": [
+      "No DR",
+      "Mild",
+      "Moderate",
+      "Severe",
+      "Proliferative DR"
+    ],
+    "matrix": [
+      [
+        333,
+        18,
+        6,
+        3,
+        1
+      ],
+      [
+        10,
+        46,
+        15,
+        0,
+        3
+      ],
+      [
+        3,
+        43,
+        111,
+        31,
+        12
+      ],
+      [
+        0,
+        1,
+        9,
+        19,
+        10
+      ],
+      [
+        0,
+        7,
+        11,
+        15,
+        26
+      ]
+    ]
+  },
+  "sample_predictions": [
+    {
+      "filename": "6fe67fd7f5d1.png",
+      "true_class": 0,
+      "true_name": "No DR",
+      "pred_class": 0,
+      "pred_name": "No DR",
+      "confidence": 65.5,
+      "correct": true
+    },
+    {
+      "filename": "d57d1be1bbd1.png",
+      "true_class": 0,
+      "true_name": "No DR",
+      "pred_class": 1,
+      "pred_name": "Mild",
+      "confidence": 49.4,
+      "correct": false
+    },
+    {
+      "filename": "eba3acc42197.png",
+      "true_class": 1,
+      "true_name": "Mild",
+      "pred_class": 1,
+      "pred_name": "Mild",
+      "confidence": 64.4,
+      "correct": true
+    },
+    {
+      "filename": "82ac8463fadd.png",
+      "true_class": 1,
+      "true_name": "Mild",
+      "pred_class": 0,
+      "pred_name": "No DR",
+      "confidence": 99.3,
+      "correct": false
+    },
+    {
+      "filename": "1594ca6c30d3.png",
+      "true_class": 2,
+      "true_name": "Moderate",
+      "pred_class": 2,
+      "pred_name": "Moderate",
+      "confidence": 43.7,
+      "correct": true
+    },
+    {
+      "filename": "44855f666225.png",
+      "true_class": 2,
+      "true_name": "Moderate",
+      "pred_class": 3,
+      "pred_name": "Severe",
+      "confidence": 62.3,
+      "correct": false
+    },
+    {
+      "filename": "7b29e3783919.png",
+      "true_class": 3,
+      "true_name": "Severe",
+      "pred_class": 3,
+      "pred_name": "Severe",
+      "confidence": 76.5,
+      "correct": true
+    },
+    {
+      "filename": "7a6e384a0846.png",
+      "true_class": 3,
+      "true_name": "Severe",
+      "pred_class": 2,
+      "pred_name": "Moderate",
+      "confidence": 27.3,
+      "correct": false
+    },
+    {
+      "filename": "2017cd92c63d.png",
+      "true_class": 4,
+      "true_name": "Proliferative DR",
+      "pred_class": 4,
+      "pred_name": "Proliferative DR",
+      "confidence": 82.4,
+      "correct": true
+    },
+    {
+      "filename": "61bbc11fe503.png",
+      "true_class": 4,
+      "true_name": "Proliferative DR",
+      "pred_class": 3,
+      "pred_name": "Severe",
+      "confidence": 45.5,
+      "correct": false
+    }
+  ],
+  "disclaimer": "This is an academic evaluation report for research purposes. NetraVision is an educational prototype and is not clinically validated."
+}
