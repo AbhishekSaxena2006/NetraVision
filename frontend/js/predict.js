@@ -5,10 +5,15 @@
  *          and results page handoff.
  */
 
+console.log('[NetraVision] predict.js v2.3.0 loaded with strict fundus validation & cache eviction');
+
 // ============================================================
 // State
 // ============================================================
 let selectedFile = null;
+
+// Purge any residual result immediately on page load
+sessionStorage.removeItem('nv_result');
 
 // ============================================================
 // DOM References
@@ -61,6 +66,9 @@ function clearError() {
 // ============================================================
 function handleFile(file) {
   clearError();
+  // Clear any previous prediction result immediately so stale results are never shown
+  sessionStorage.removeItem('nv_result');
+
   const result = validateFile(file);
   if (!result.ok) {
     showError(result.message);
@@ -132,6 +140,7 @@ if (dropZone) {
 if (removeBtn) {
   removeBtn.addEventListener('click', () => {
     selectedFile = null;
+    sessionStorage.removeItem('nv_result');
     if (previewImg)    previewImg.src = '';
     if (previewArea)   previewArea.classList.add('hidden');
     if (dropZone)      dropZone.classList.remove('hidden');
@@ -156,6 +165,7 @@ if (analyzeBtn) {
 
 async function runAnalysis() {
   clearError();
+  sessionStorage.removeItem('nv_result');
   setLoadingState(true);
 
   // Smooth simulated progress during inference
@@ -186,10 +196,16 @@ async function runAnalysis() {
     clearInterval(progressInterval);
 
     if (!response.ok) {
+      // Ensure stale results are completely purged on any validation rejection
+      sessionStorage.removeItem('nv_result');
       const errorData = await response.json().catch(() => null);
-      const msg = (errorData && errorData.error)
+      let msg = (errorData && errorData.error)
         ? errorData.error
         : `Prediction failed with status ${response.status}.`;
+      // For fundus validation rejections (422), append the hint if present
+      if (response.status === 422 && errorData && errorData.hint) {
+        msg = `🔍 ${msg} — ${errorData.hint}`;
+      }
       showError(msg);
       setLoadingState(false);
       return;
@@ -199,6 +215,7 @@ async function runAnalysis() {
     const data = await response.json();
 
     if (data.status === 'error' || data.predicted_class === undefined) {
+      sessionStorage.removeItem('nv_result');
       showError(data.error || 'Invalid prediction response from server.');
       setLoadingState(false);
       return;
@@ -208,6 +225,7 @@ async function runAnalysis() {
     saveResultAndRedirect(data);
 
   } catch (err) {
+    sessionStorage.removeItem('nv_result');
     clearInterval(progressInterval);
     console.error('Analysis error:', err);
     showError('Unable to connect to the prediction backend. Please ensure the Flask server is running at http://127.0.0.1:5000.');

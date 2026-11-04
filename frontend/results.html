@@ -378,13 +378,14 @@
   </div>
 </footer>
 
-<script src="js/main.js"></script>
+<script src="js/main.js?v=2.3.0"></script>
 <script>
 /**
  * results.js (inline) — Reads sessionStorage data from predict.js
  * and populates the results page UI.
  */
 (function initResults() {
+  console.log('[NetraVision] results.html v2.3.0 initialized');
   const stored = sessionStorage.getItem('nv_result');
 
   if (!stored) {
@@ -393,7 +394,23 @@
     return;
   }
 
-  const data = JSON.parse(stored);
+  let data;
+  try {
+    data = JSON.parse(stored);
+  } catch (e) {
+    sessionStorage.removeItem('nv_result');
+    document.getElementById('noResult').classList.remove('hidden');
+    document.getElementById('resultsContent').classList.add('hidden');
+    return;
+  }
+
+  // Guard: if stored data is not an authentic successful prediction, clear and hide
+  if (!data || data.status !== 'success' || data.predicted_class === undefined || !Array.isArray(data.probabilities)) {
+    sessionStorage.removeItem('nv_result');
+    document.getElementById('noResult').classList.remove('hidden');
+    document.getElementById('resultsContent').classList.add('hidden');
+    return;
+  }
 
   // Severity definitions
   const severityInfo = [

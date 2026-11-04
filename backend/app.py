@@ -23,6 +23,9 @@ import torch
 import torch.nn.functional as F
 import cv2
 
+# Fundus image heuristic validator (must import after sys.path is configured below)
+# Deferred import happens after ML path setup — see bottom of startup block.
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -37,10 +40,14 @@ ML_DIR = os.path.join(REPO_ROOT, "ml")                              # NetraVisio
 FRONTEND_DIR = os.path.join(REPO_ROOT, "frontend")                  # NetraVision/frontend
 OUTPUTS_DIR = os.path.join(REPO_ROOT, "outputs")                    # NetraVision/outputs
 
-# Add ML directory to Python path
+# Add ML directory and Backend directory to Python path
 if os.path.exists(ML_DIR) and ML_DIR not in sys.path:
     sys.path.insert(0, ML_DIR)
     logger.info("Added ML module directory to sys.path: %s", ML_DIR)
+
+if os.path.exists(BACKEND_DIR) and BACKEND_DIR not in sys.path:
+    sys.path.insert(0, BACKEND_DIR)
+    logger.info("Added Backend directory to sys.path: %s", BACKEND_DIR)
 
 # Import model configuration, preprocessing, and mappings from ml/
 try:
@@ -55,6 +62,20 @@ except ImportError as e:
         "Please ensure the directory contains config.py, predict.py, and model.py."
     ) from e
 
+# Import fundus image heuristic validator (fail closed — never run without validator)
+try:
+    try:
+        from fundus_validator import validate_fundus_image
+    except ImportError:
+        from backend.fundus_validator import validate_fundus_image
+    logger.info("Fundus image validator loaded successfully.")
+except ImportError as e:
+    logger.critical("FATAL: Could not import fundus_validator: %s", e)
+    raise RuntimeError(
+        f"FATAL: fundus_validator could not be loaded from '{BACKEND_DIR}'. "
+        "Strict retinal image validation is mandatory."
+    ) from e
+
 # Model checkpoint configuration (defaults to NetraVision/outputs/best_model.pth)
 DEFAULT_MODEL_PATH = os.path.join(OUTPUTS_DIR, "best_model.pth")
 MODEL_PATH = os.environ.get("NETRAVISION_MODEL_PATH", DEFAULT_MODEL_PATH)
@@ -67,21 +88,40 @@ CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
 # Configuration
 app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024  # 16 MB upload limit
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg"}
+VERSION = "2.3.0-strict-fundus-guard"
 DISCLAIMER_TEXT = (
     "NetraVision is an educational and academic research prototype. "
     "It is NOT clinically validated, approved as a diagnostic tool, or a substitute "
     "for professional clinical assessment by a certified ophthalmologist."
 )
 
-# Load PyTorch model at startup
+@app.after_request
+def add_cache_prevention_headers(response):
+    """Disable aggressive browser caching so frontend JS updates take effect immediately."""
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    return response
+
+# Load PyTorch model at startup (with lazy-load fallback)
+def get_model_instance():
+    global model
+    if model is None:
+        try:
+            logger.info("Loading PyTorch model from: %s on device: %s", MODEL_PATH, DEVICE)
+            model = load_inference_model(weights_path=MODEL_PATH, device=DEVICE)
+            model.eval()
+            logger.info("Model loaded successfully and set to evaluation mode.")
+        except Exception as e:
+            logger.error("Error loading model checkpoint: %s", e)
+            model = None
+    return model
+
+model = None
 try:
-    logger.info("Loading PyTorch model from: %s on device: %s", MODEL_PATH, DEVICE)
-    model = load_inference_model(weights_path=MODEL_PATH, device=DEVICE)
-    model.eval()
-    logger.info("Model loaded successfully and set to evaluation mode.")
+    model = get_model_instance()
 except Exception as e:
-    logger.error("Error loading model checkpoint: %s", e)
-    model = None
+    logger.warning("Startup model load deferred: %s", e)
 
 def allowed_file(filename: str) -> bool:
     """Checks whether the filename has an allowed extension."""
@@ -124,6 +164,8 @@ def health_check():
     response = {
         "status": "healthy" if is_loaded else "degraded",
         "backend": "NetraVision Flask Backend",
+        "version": VERSION,
+        "validator_active": validate_fundus_image is not None,
         "model_loaded": is_loaded,
         "model_path": MODEL_PATH,
         "device": str(DEVICE),
@@ -182,12 +224,50 @@ def predict():
             file.save(temp_file.name)
             temp_file_path = temp_file.name
 
-        # Validate that the file is not empty
-        if os.path.getsize(temp_file_path) == 0:
+        file_size_bytes = os.path.getsize(temp_file_path)
+        if file_size_bytes == 0:
             return jsonify({
                 "status": "error",
                 "error": "Uploaded image file is empty (0 bytes)."
             }), 400
+
+        logger.info("=" * 60)
+        logger.info("[NETRAVISION PREDICT] Incoming request: file='%s' size=%d bytes", filename, file_size_bytes)
+
+        # ── Dedicated Fundus-vs-Non-Fundus Validation Step ───────────────────
+        # Runs BEFORE deep learning preprocessing and inference.
+        # Enforces optical aperture, circular disc geometry, scale-invariant
+        # sharpness, and physiological retinal chromaticity.
+        if validate_fundus_image is None:
+            logger.critical("[FATAL] Fundus validator is not loaded. Refusing unverified prediction.")
+            return jsonify({
+                "status": "error",
+                "error": "Image validation service is unavailable. Refusing unverified prediction.",
+                "hint": "Please restart backend server."
+            }), 500
+
+        logger.info("[VALIDATOR] Running multi-domain fundus validation on '%s'...", filename)
+        val_result = validate_fundus_image(temp_file_path)
+        if not val_result.passed:
+            logger.warning(
+                "[VALIDATOR REJECTED] file='%s' | error_code='%s' | reason='%s'",
+                filename, val_result.reason, val_result.message
+            )
+            logger.warning("[VALIDATOR DETAILS] %s", val_result.details)
+            # 400 for corrupted/unreadable image bytes; 422 for non-fundus semantic validation rejections
+            status_code = 400 if val_result.reason == "UNREADABLE" else 422
+            return jsonify({
+                "status": "error",
+                "error_code": val_result.reason,
+                "error": val_result.message,
+                "validation_details": val_result.details,
+                "hint": getattr(val_result, "hint", "Please upload a clear retinal fundus photograph.")
+            }), status_code
+
+        logger.info("[VALIDATOR PASSED] file='%s' verified as authentic fundus image. Proceeding to DR model inference.", filename)
+        for w in getattr(val_result, "warnings", []):
+            logger.warning("[VALIDATOR WARNING] %s: %s", filename, w)
+        # ────────────────────────────────────────────────────────────────────
 
         # Reuse exact preprocessing from predict.py
         # preprocess_image reads file with cv2.imread and applies Ben Graham preprocessing & normalization
@@ -280,7 +360,11 @@ def serve_frontend(path):
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     host = os.environ.get("HOST", "127.0.0.1")
-    logger.info("Starting NetraVision backend server at http://%s:%d", host, port)
-    logger.info("Serving frontend files from: %s", FRONTEND_DIR)
+    logger.info("=" * 65)
+    logger.info("  NETRAVISION BACKEND SERVER - v%s", VERSION)
+    logger.info("  Fundus Image Verification Engine: %s", "ACTIVE (STRICT)" if validate_fundus_image else "INACTIVE")
+    logger.info("  Starting at http://%s:%d", host, port)
+    logger.info("  Serving frontend from: %s", FRONTEND_DIR)
+    logger.info("=" * 65)
     logger.info("DISCLAIMER: %s", DISCLAIMER_TEXT)
     app.run(host=host, port=port, debug=False)

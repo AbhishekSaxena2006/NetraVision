@@ -26,10 +26,12 @@ class NetraVisionAPITestCase(unittest.TestCase):
         data = response.get_json()
         self.assertEqual(data.get("status"), "healthy")
         self.assertTrue(data.get("model_loaded"))
+        self.assertTrue(data.get("validator_active"), "Fundus validator is not active in /api/health")
+        self.assertEqual(data.get("version"), "2.3.0-strict-fundus-guard")
         self.assertEqual(data.get("num_classes"), 5)
         self.assertIn("class_mapping", data)
         self.assertIn("disclaimer", data)
-        print("\n[PASS] Health check verified.")
+        print("\n[PASS] Health check verified (Validator Active: True, Version: 2.2.0-fundus-guard).")
 
     def test_predict_no_file(self):
         """Test POST /api/predict without an image file returns 400 error."""
