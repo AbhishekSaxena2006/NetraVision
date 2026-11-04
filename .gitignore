@@ -1,8 +1,42 @@
+# ==========================================
+# NetraVision .gitignore
+# ==========================================
+
+# Model checkpoints & large binary weights (do not commit to Git)
+*.pth
+*.pt
+*.bin
+*.onnx
+*.ckpt
+outputs/*.pth
+outputs/*.pt
+
+# Allow lightweight report and metric files in outputs
+!outputs/training_history.csv
+!outputs/training_metrics.json
+!outputs/evaluation_report.json
+!outputs/evaluation_report.md
+
+# External raw datasets (must remain outside the repository)
+train_images/
+test_images/
+*.csv.zip
+
+# Python caches and compiled bytecode
 __pycache__/
 *.py[cod]
 *$py.class
-.env
-.venv
+*.pyd
+.pytest_cache/
+
+# Virtual environments
+.venv/
 env/
 venv/
+ENV/
 
+# Environment variables & local IDE configs
+.env
+.env.local
+.vscode/
+.idea/

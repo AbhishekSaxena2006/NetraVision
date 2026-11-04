@@ -42,8 +42,6 @@ All pages feature a cohesive, medical-grade dark visual aesthetic inspired by mo
 | **Features** | `features.html` | In-depth breakdown of system capabilities, comparison table (NetraVision vs. Manual Screening), interactive tooltips. |
 | **How It Works** | `how-it-works.html` | Step-by-step visual AI pipeline (Acquisition &rarr; Preprocessing &rarr; CLAHE Enhancement &rarr; CNN Feature Extraction &rarr; Softmax Classification) + FAQ accordion. |
 | **About** | `about.html` | Project mission, clinical motivation, technical architecture summary, values, and research disclaimer. |
-| **Our Team** | `team.html` | Interactive profile cards showcasing all 4 college project team members, highlighting Member 3's frontend focus. |
-| **Contact** | `contact.html` | Fully validated contact form (real-time error checking, character counter, simulated submission toast), institutional contacts, and FAQs. |
 
 ---
 
@@ -117,40 +115,77 @@ async function runAnalysis() {
 
 ```text
 NetraVision/
-├── index.html           # Homepage
-├── predict.html         # Image upload & inference starter
-├── results.html         # Diagnostic output & report generator
-├── features.html        # System capabilities & comparison
-├── how-it-works.html    # AI pipeline & CNN architecture
-├── about.html           # Mission, motivation, research info
-├── team.html            # Team profiles & role credits
-├── contact.html         # Feedback & inquiry form
-├── README.md            # Project documentation (this file)
-├── css/
-│   └── style.css        # Unified design system & responsive styling
-├── js/
-│   ├── main.js          # Shared navbar, scroll-reveal, particle engine
-│   └── predict.js       # File upload handler & client simulation
-└── assets/
-    └── images/          # High-resolution clinical AI visuals & graphics
+├── frontend/                       # Client presentation layer (Vanilla HTML/CSS/JS)
+│   ├── assets/images/              # High-resolution clinical visuals & branding
+│   ├── css/style.css               # Design system & responsive styles
+│   ├── js/
+│   │   ├── main.js                 # Navbar, scroll animations, particle engine
+│   │   └── predict.js              # File upload handler & results redirection
+│   ├── index.html                  # Homepage with interactive showcase
+│   ├── predict.html                # Image uploader & inference portal
+│   ├── results.html                # Dynamic diagnostic report & breakdown
+│   ├── features.html               # Platform capabilities & clinical comparison
+│   ├── how-it-works.html           # 5-stage AI pipeline & architecture guide
+│   ├── about.html                  # Project background & medical motivation
+│
+├── backend/                        # API service layer (Python / Flask)
+│   ├── app.py                      # Flask API endpoints (/api/health, /api/predict)
+│   ├── test_api.py                 # Automated unit tests for API endpoints
+│   └── requirements.txt            # Python dependencies
+│
+├── ml/                             # Model architecture & experiment pipelines
+│   ├── config.py                   # Central hyperparameters, paths, and class mappings
+│   ├── dataset.py                  # Ben Graham contrast enhancement & stratified split
+│   ├── model.py                    # NetraVisionDRNet residual neural network definition
+│   ├── predict.py                  # Standalone CLI inference & clinical guidance
+│   ├── train.py                    # Stratified training pipeline with EarlyStopping
+│   ├── utils.py                    # Loss weighting & Quadratic Weighted Kappa (QWK)
+│   └── evaluate.py                 # 5-class benchmark evaluation suite
+│
+├── outputs/                        # Training checkpoints & validation metrics
+│   ├── best_model.pth              # Local PyTorch weights (excluded from Git via .gitignore)
+│   ├── training_history.csv        # Epoch training & validation metric history
+│   ├── training_metrics.json       # Serialized metrics log
+│   ├── evaluation_report.json      # Complete benchmark numbers & confusion matrix
+│   └── evaluation_report.md        # Detailed evaluation report
+│
+├── .gitignore                      # Excludes large binaries (*.pth), datasets, and caches
+└── README.md                       # Project documentation (this file)
+
+[EXTERNAL DATASET]
+D:\aptos2019-blindness-detection\   # Raw APTOS 2019 dataset (train_images/, test_images/, CSVs)
 ```
 
 ---
 
 ## 🚀 Getting Started & Local Preview
 
-No `npm install` or compilation steps required!
+### 1. Backend API & Full-Stack Server
+Install Python dependencies and launch the backend (which also serves the frontend):
 
-1. **Directly via Browser**:
-   - Double-click `index.html` or drag it into any web browser (Chrome, Edge, Firefox, Safari).
-2. **Via VS Code Live Server**:
-   - Open the `NetraVision` folder in VS Code, right-click `index.html`, and click **"Open with Live Server"**.
-3. **Via Python Built-in Server**:
-   ```bash
-   cd NetraVision
-   python -m http.server 8000
-   ```
-   Open `http://localhost:8000` in your browser.
+```powershell
+cd NetraVision\backend
+pip install -r requirements.txt
+python app.py
+```
+- Open `http://localhost:5000` or `http://localhost:5000/predict.html` in your browser.
+- Health Check: `http://localhost:5000/api/health`
+
+### 2. Run Backend Unit Tests
+```powershell
+cd NetraVision\backend
+python test_api.py
+```
+
+### 3. Standalone CLI Inference
+```powershell
+cd NetraVision\ml
+python predict.py --sample
+```
+
+### 4. Frontend Preview via VS Code / Static Server
+You can also preview the UI independently from `frontend/`:
+- Open `frontend/index.html` directly in any web browser, or launch VS Code Live Server from the `frontend/` directory.
 
 ---
 

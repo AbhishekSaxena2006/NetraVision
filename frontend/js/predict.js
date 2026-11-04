@@ -1,27 +1,8 @@
 /**
  * NetraVision — predict.js
  * Handles: drag-and-drop upload, image preview, file validation,
- *          loading state, demo prediction, and results page handoff.
- *
- * ----------------------------------------------------------------
- * BACKEND INTEGRATION GUIDE (for the Flask/API developer):
- * ----------------------------------------------------------------
- * Search for the function `runAnalysis()` below.
- * Replace the `simulateDemoPrediction()` call inside it with a
- * real fetch() call to your Flask API endpoint, for example:
- *
- *   const formData = new FormData();
- *   formData.append('image', selectedFile);
- *   const response = await fetch('/api/predict', {
- *     method: 'POST',
- *     body: formData
- *   });
- *   const data = await response.json();
- *   // data should have: { level, label, confidence, recommendations }
- *   saveResultAndRedirect(data);
- *
- * The rest of the UI (loading, progress, redirect) is already handled.
- * ----------------------------------------------------------------
+ *          loading state, real-time PyTorch backend inference,
+ *          and results page handoff.
  */
 
 // ============================================================
@@ -174,62 +155,64 @@ if (analyzeBtn) {
 }
 
 async function runAnalysis() {
-  // Show loading state
+  clearError();
   setLoadingState(true);
 
-  try {
-    // --------------------------------------------------------
-    // DEMO MODE: Simulates prediction without a real backend.
-    // Replace this block with a real API call when ready.
-    // --------------------------------------------------------
-    const result = await simulateDemoPrediction();
+  // Smooth simulated progress during inference
+  let progress = 12;
+  updateProgress(progress);
+  const progressInterval = setInterval(() => {
+    if (progress < 90) {
+      progress += Math.random() * 12 + 6;
+      if (progress > 90) progress = 90;
+      updateProgress(progress);
+    }
+  }, 250);
 
-    // Save result to sessionStorage and redirect to results page
-    saveResultAndRedirect(result);
+  try {
+    const formData = new FormData();
+    formData.append('image', selectedFile);
+
+    // Support both direct Flask serving and cross-origin Live Server
+    const apiUrl = (window.location.protocol === 'file:' || (window.location.port && window.location.port !== '5000'))
+      ? 'http://127.0.0.1:5000/api/predict'
+      : '/api/predict';
+
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      body: formData
+    });
+
+    clearInterval(progressInterval);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      const msg = (errorData && errorData.error)
+        ? errorData.error
+        : `Prediction failed with status ${response.status}.`;
+      showError(msg);
+      setLoadingState(false);
+      return;
+    }
+
+    updateProgress(100);
+    const data = await response.json();
+
+    if (data.status === 'error' || data.predicted_class === undefined) {
+      showError(data.error || 'Invalid prediction response from server.');
+      setLoadingState(false);
+      return;
+    }
+
+    // Save actual model prediction to sessionStorage and redirect
+    saveResultAndRedirect(data);
 
   } catch (err) {
+    clearInterval(progressInterval);
     console.error('Analysis error:', err);
-    showError('An error occurred. Please try again.');
+    showError('Unable to connect to the prediction backend. Please ensure the Flask server is running at http://127.0.0.1:5000.');
     setLoadingState(false);
   }
-}
-
-// ============================================================
-// Demo Prediction Simulation
-// ============================================================
-function simulateDemoPrediction() {
-  return new Promise(resolve => {
-    // Simulate network delay (1.5 – 2.5 seconds)
-    const delay = 1500 + Math.random() * 1000;
-
-    // Simulate progress bar
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress += Math.random() * 15 + 5;
-      if (progress > 95) progress = 95;
-      updateProgress(progress);
-    }, 200);
-
-    setTimeout(() => {
-      clearInterval(interval);
-      updateProgress(100);
-
-      // Randomly pick a severity level for demo purposes
-      const severityLevels = [
-        { level: 0, label: 'No DR (Normal)',      confidence: 92 + Math.random() * 5 },
-        { level: 1, label: 'Mild DR',             confidence: 78 + Math.random() * 10 },
-        { level: 2, label: 'Moderate DR',         confidence: 81 + Math.random() * 8 },
-        { level: 3, label: 'Severe DR',           confidence: 85 + Math.random() * 7 },
-        { level: 4, label: 'Proliferative DR',    confidence: 88 + Math.random() * 8 },
-      ];
-
-      // For demo: pick level 1 (Mild DR) as a reproducible example
-      const result = severityLevels[1];
-      result.confidence = parseFloat(result.confidence.toFixed(1));
-
-      resolve(result);
-    }, delay);
-  });
 }
 
 // ============================================================
@@ -267,8 +250,8 @@ function saveResultAndRedirect(result) {
   const payload = {
     ...result,
     timestamp: new Date().toISOString(),
-    isDemo: true, // Flag: replace with false when using real API
-    imageName: selectedFile ? selectedFile.name : 'sample.jpg',
+    isDemo: false,
+    imageName: selectedFile ? selectedFile.name : (result.filename || 'sample.jpg'),
   };
 
   // Also store the image preview as base64

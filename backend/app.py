@@ -30,36 +30,38 @@ logging.basicConfig(
 )
 logger = logging.getLogger("NetraVisionBackend")
 
-# Resolve path to APTOS model and training codebase
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-APTOS_DIR = os.environ.get(
-    "APTOS_PROJECT_DIR",
-    os.path.abspath(r"D:\aptos2019-blindness-detection")
-)
-if os.path.exists(APTOS_DIR) and APTOS_DIR not in sys.path:
-    sys.path.insert(0, APTOS_DIR)
-    logger.info("Added APTOS codebase path to sys.path: %s", APTOS_DIR)
+# Resolve repository paths
+BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))            # NetraVision/backend
+REPO_ROOT = os.path.dirname(BACKEND_DIR)                            # NetraVision
+ML_DIR = os.path.join(REPO_ROOT, "ml")                              # NetraVision/ml
+FRONTEND_DIR = os.path.join(REPO_ROOT, "frontend")                  # NetraVision/frontend
+OUTPUTS_DIR = os.path.join(REPO_ROOT, "outputs")                    # NetraVision/outputs
 
-# Import exact model configuration, preprocessing and mapping from predict.py & config.py
+# Add ML directory to Python path
+if os.path.exists(ML_DIR) and ML_DIR not in sys.path:
+    sys.path.insert(0, ML_DIR)
+    logger.info("Added ML module directory to sys.path: %s", ML_DIR)
+
+# Import model configuration, preprocessing, and mappings from ml/
 try:
     import config
     from predict import load_inference_model, preprocess_image, CLINICAL_RECOMMENDATIONS
     from model import get_model
-    logger.info("Successfully imported modules from APTOS codebase.")
+    logger.info("Successfully imported modules from NetraVision ML package.")
 except ImportError as e:
-    logger.error("Failed to import APTOS modules from %s: %s", APTOS_DIR, e)
+    logger.error("Failed to import ML modules from %s: %s", ML_DIR, e)
     raise RuntimeError(
-        f"Unable to load APTOS dependencies from '{APTOS_DIR}'. "
-        "Please ensure the directory exists and contains config.py and predict.py."
+        f"Unable to load ML dependencies from '{ML_DIR}'. "
+        "Please ensure the directory contains config.py, predict.py, and model.py."
     ) from e
 
-# Model checkpoint configuration
-DEFAULT_MODEL_PATH = os.path.join(APTOS_DIR, "outputs", "best_model.pth")
+# Model checkpoint configuration (defaults to NetraVision/outputs/best_model.pth)
+DEFAULT_MODEL_PATH = os.path.join(OUTPUTS_DIR, "best_model.pth")
 MODEL_PATH = os.environ.get("NETRAVISION_MODEL_PATH", DEFAULT_MODEL_PATH)
 DEVICE = config.DEVICE
 
-# Initialize Flask app
-app = Flask(__name__, static_folder=".", static_url_path="")
+# Initialize Flask app with frontend static directory
+app = Flask(__name__, static_folder=FRONTEND_DIR, static_url_path="")
 CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
 
 # Configuration
@@ -262,23 +264,23 @@ def predict():
             except Exception as ce:
                 logger.warning("Could not delete temporary file %s: %s", temp_file_path, ce)
 
-# Static file serving to allow opening NetraVision directly from Flask
+# Static file serving from frontend/
 @app.route("/", defaults={"path": "index.html"})
 @app.route("/<path:path>")
 def serve_frontend(path):
     if path.startswith("api/"):
         return jsonify({"status": "error", "error": "Not found"}), 404
-    file_path = os.path.join(BASE_DIR, path)
+    file_path = os.path.join(FRONTEND_DIR, path)
     if os.path.isfile(file_path):
-        return send_from_directory(BASE_DIR, path)
+        return send_from_directory(FRONTEND_DIR, path)
     if os.path.isfile(file_path + ".html"):
-        return send_from_directory(BASE_DIR, path + ".html")
+        return send_from_directory(FRONTEND_DIR, path + ".html")
     return jsonify({"status": "error", "error": "Resource not found"}), 404
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     host = os.environ.get("HOST", "127.0.0.1")
     logger.info("Starting NetraVision backend server at http://%s:%d", host, port)
+    logger.info("Serving frontend files from: %s", FRONTEND_DIR)
     logger.info("DISCLAIMER: %s", DISCLAIMER_TEXT)
     app.run(host=host, port=port, debug=False)
-
